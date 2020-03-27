@@ -94,7 +94,8 @@ int openrel(char RelName[16]);
        }
        if(i==13)
        {        cout<<"E_CACHEFULL\n";
-        return 0; 
+        //or E_CACHEFULL?
+        return -1; 
        }     
 }
 
