@@ -297,18 +297,19 @@ int setRecord(union Attribute *rec,int blockNum,int slotNum)
 
 
 
-int ba_insert(int relid, union Attribute *rec){
+
+int ba_insert(int relid, union Attribute *rec)
+{
 	RelCatEntry relcat_entry;
 	AttrCatEntry attrcat_entry;
-	int first_block;
+	/*int first_block;
 	int num_attrs;
 	int num_slots;
 	int root_block;
 	recId recid;
-	int iter;
+	int iter;*/
 	//RecBuffer *rec_buffer;
 	struct HeadInfo header;
-	
 	getRelCatEntry(relid, &relcat_entry);
 	first_block = relcat_entry.first_blk;
 	num_slots = relcat_entry.num_slots_blk;
@@ -345,12 +346,10 @@ int ba_insert(int relid, union Attribute *rec){
 		if(attrcat_entry.root_block != -1){ //if index presents for the attribute
 			bplus_insert(relid, attrcat_entry.attr_name, rec[iter], recid); //inserting bplus tree
 			/* WRITE FAILURE CONDITION */
-
-	
+		//}	
+	//}*/
 	return SUCCESS;
 }
-
-
 recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId * prev_recid)
 {
 	//get the record corresponding to the relation name

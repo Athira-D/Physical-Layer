@@ -1,25 +1,28 @@
-#include<string.h>
-
-int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[]){
-    int relcat_entry;
-    struct RelCatEntry relcat;
-    OpenRelTable::getRelCatEntry(0,&relcat);
-    recId targetrelid;
+//E_RELEXIST =0
+int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
+{
+    //int relcat_entry;
+    //struct RelCatEntry relcat;
+    //OpenRelTable::getRelCatEntry(0,&relcat);
+    //recId targetrelid;
     union Attribute attrval;
     strcpy(attrval.sval,relname);
-
     union Attribute relcatrec[6];//relname,#attrs,#records,firstblk,slotsperblk
     int flag=ba_search(0,relcatrec,"RelName", attrval, EQ);
 
-    if(flag==SUCCESS){
+    if(flag==SUCCESS)
+   {
         return E_RELEXIST; //Relation name already exists.
     }
 
     int iter;
-    for(iter=0;iter<nAttrs;iter++){
+    for(iter=0;iter<nAttrs;iter++)
+    {
         int iter2;
-        for(iter2=iter+1;iter2<nAttrs;iter2++){
-            if(strcmp(attrs[iter],attrs[iter2])==0){
+        for(iter2=iter+1;iter2<nAttrs;iter2++)
+       {
+            if(strcmp(attrs[iter],attrs[iter2])==0)
+            {
                 return E_DUPLICATEATTR;  //distinct attributes having same name.
             }
         }
@@ -32,15 +35,15 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
     relcatrec[4].ival=(2016/(16*nAttrs+1));
 
     flag=ba_insert(0,relcatrec);
-
-    if(flag!=SUCCESS){
+    if(flag!=SUCCESS)
+   {
         ba_delete(relname);
         return flag;
     }
 
-    for(iter=0;iter<nAttrs;iter++){
+    for(iter=0;iter<nAttrs;iter++)
+   {
         union Attribute attrcatrec[6];//relname,attrname,attrtype,primaryflag,rootblk,offset
-
         strcpy(attrcatrec[0].sval,relname);
         strcpy(attrcatrec[1].sval,attrs[iter]);
         attrcatrec[2].ival=attrtype[iter];
@@ -49,17 +52,16 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
         attrcatrec[5].ival=iter;
 
         flag=ba_insert(1,attrcatrec);
-
         if(flag!=SUCCESS){
             ba_delete(relname);
             return flag;
         }
-
     }
-
-    return SUCCESS;
-	
+    return SUCCESS;	
 }
+
+
+
 
 int openrel(char RelName[16]);
 {
