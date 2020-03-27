@@ -297,9 +297,7 @@ int setRecord(union Attribute *rec,int blockNum,int slotNum)
 
 
 
-
-int ba_insert(int relid, union Attribute *rec)
-{
+int ba_insert(int relid, union Attribute *rec){
 	RelCatEntry relcat_entry;
 	AttrCatEntry attrcat_entry;
 	/*int first_block;
@@ -310,6 +308,7 @@ int ba_insert(int relid, union Attribute *rec)
 	int iter;*/
 	//RecBuffer *rec_buffer;
 	struct HeadInfo header;
+	
 	getRelCatEntry(relid, &relcat_entry);
 	first_block = relcat_entry.first_blk;
 	num_slots = relcat_entry.num_slots_blk;
@@ -346,10 +345,12 @@ int ba_insert(int relid, union Attribute *rec)
 		if(attrcat_entry.root_block != -1){ //if index presents for the attribute
 			bplus_insert(relid, attrcat_entry.attr_name, rec[iter], recid); //inserting bplus tree
 			/* WRITE FAILURE CONDITION */
-		//}	
-	//}*/
+
+	
 	return SUCCESS;
 }
+
+
 recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId * prev_recid)
 {
 	//get the record corresponding to the relation name
@@ -629,3 +630,36 @@ int ba_delete(char relName[ATTR_SIZE])
 	fclose(disk);
 	return SUCCESS;
 }	 
+
+int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op){
+	
+	/*get the attribute catalog entry from the attribute cache corresponding 
+	  to the relation with Id=relid and with attribute_name=attrName using
+	  OpenRelTable::getAttrCatEntry(relid, attrName, &attrcat_entry); of cache layer */
+	//get root_block from the attribute catalog entry (attrcat_entry)
+	union Attribute attrcat_entry[6];
+	getAttrCatEntry(relid,root_block,&attrcat_entry);
+	int root_block=attrcat[4].ival;
+	recId recid;
+	static prev_recid={-1,-1};
+	if(root_block == -1)
+	{ 	//if Index does not exist for the attribute
+		//search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval  
+		recid = linear_search(relid, attrName, attrVal, op,&prev_recid,&prev_recid);
+	}
+	else
+	{ //if Index exists for the attribute
+	  //search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval
+		recid = bplus_search(relid, attrName, attval, op,&prev_recid);
+	}
+	
+	if(recid == {-1, -1})
+	{ //if it fails to find a record satisfying the given condition
+		return E_NOTFOUND;
+	}
+	
+	 //recid.block is the block that contains record
+	getRecord(record, recid.block,recid.slot); //recid.slot is the slot that contains record
+
+	return SUCCESS;
+}
