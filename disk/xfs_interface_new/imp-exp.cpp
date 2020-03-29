@@ -1,13 +1,46 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<bits/stdc++.h>
+using namespace std;
+
+#include "block_access.cpp"
+#include "disksimulator.cpp"
+#include "schema.cpp"
+#include "disk_structure.h"
+
 //TO DO
 //define constants for INT,FLT,STR
 //Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
 //Assuming createRel return 1 on success
+
+int check_type(char *data)
+{	
+	int count_int=0,count_dot=0,count_string=0,i;
+	for(i=0;data[i]!='\0';i++)
+	{
+		
+		if(data[i]>='0'&&data[i]<='9')
+			count_int++;
+		if(data[i]=='.')
+			count_dot++;
+		else
+			count_string++;
+	}
+	//printf("%d:%d:%d:%d",count_int,count_dot,count_string,i);
+	if(count_dot==1&&count_int==(strlen(data)-1))
+		return 0; //FLOAT
+	if(count_int==strlen(data))
+		return 1; //INT
+	else
+		return 2; //STRING
+}
+
 void import(char *filename)
 {
      FILE *file=fopen(filename,"r");
      //attr : first line in the file	
      //count : no of attributes in the file
-     char *attr=malloc(sizeof(char));
+     char *attr=(char*) malloc(sizeof(char));
      int len=1;
      char ch;
      int count=1;
@@ -17,7 +50,7 @@ void import(char *filename)
 		count++;
           attr[len-1]=ch;
           len++;
-          attr=realloc(attr,(len)*sizeof(char));
+          attr=(char*) realloc(attr,(len)*sizeof(char));
     }
      attr[len-1]='\0';
      int i=0,j,k;
@@ -34,14 +67,15 @@ void import(char *filename)
 	}
 	i=0;
       //attribute array contains the names of all attributes
+    
 
-	char *attr_type=malloc(sizeof(char));
+	char *attr_type=(char*) malloc(sizeof(char));
 	len=1;
 	while((ch = fgetc(file)) != '\n') 
 	 {
         		 attr_type[len-1]=ch;
        		 len++;
-       		 attr_type=realloc(attr_type,(len)*sizeof(char));
+       		 attr_type=(char*) realloc(attr_type,(len)*sizeof(char));
     	}
     	 attr_type[len-1]='\0';
     	 i=0;
@@ -62,9 +96,10 @@ void import(char *filename)
 		if(t==1)
 			type[j]=INT;
 		if(t==2)
-			type=STR;
+			type[j]=STR;
 		j++;i++;
 	}
+     
 	i=0;
 	//type array contains the types of all attributes
 	char newfilename[(strlen(filename))-4];
@@ -75,61 +110,85 @@ void import(char *filename)
 		loopv++;
 		}
 	newfilename[loopv]='\0';
-          int ret=createRel(newfilename,count,attribute,attribute_type);
+          int ret;
+          ret=createRel(newfilename,count,attribute,attribute_type);
           int relid=openRel(newfilename);
          //Assuming createRel return 1 on success
-          if(ret!=1)
+         if(ret!=1)
     	{
 		cout<<"IMPORT NOT POSSIBLE\n";
+                   return;
 	}
 	file=fopen(filename,"r");
 	while((ch = fgetc(file)) != '\n')
 	 	continue;
           
-	char *record=malloc(sizeof(char));
+	char *record=(char*) malloc(sizeof(char));
 	len=1;
 
           while(1)
 	{
-	while((ch = fgetc(file)) != '\n'&&(ch!=EOF)) 
+	ch= fgetc(file);
+          len=1;
+	while((ch  != '\n')&&(ch!=EOF)) 
 	 {
         		 record[len-1]=ch;
        		 len++;
-       		 record=realloc(attr_type,(len)*sizeof(char));
+       		 record=(char*) realloc(record,(len)*sizeof(char));
+                     ch=fgetc(file);
     	}
-    	 record[len-1]='\0';
-    	 i=0;
-           //record contains each record in the file (seperated by commas)
-       	int record_array[count];
+          record[len-1]='\0';
+    	i=0;
+         //record contains each record in the file (seperated by commas)
+          char record_array[count][16];
     	j=0;
 	while(j<count)
 	{ 	k=0;
-       		while(((record_array[i]!=',')&&(record_array[i]!='\0'))&&(k<16))
+       		while(((record[i]!=',')&&(record[i]!='\0'))&&(k<16))
 		{
-	    		record_array[j][k++]=record_array[i++];
+	    		record_array[j][k++]=record[i++];        
 		}
+                    i++;
+                    record_array[j][k]='\0';
+                    j++;
 	}
           union Attribute rec[count];
           for(int l=0;l<count;l++)
 	{
 	   	if(type[l]==0)
-                           type[l].fval=record_array[l];
+		       {
+		       cout<<record_array[l];
+                           rec[l].fval=stof(record_array[l]);
+		       }
 		if(type[l]==1)
-                           type[l].ival=record_array[l];
+		       {
+		       cout<<record_array[l];
+                           rec[l].ival=atoi(record_array[l]);
+		        }
 		if(type[l]==2)
-                           strcpy(type[l].strval,record_array[l]);
+		        {
+		        cout<<record_array[l];
+                            strcpy(rec[l].strval,record_array[l]);
+		        }
+                    cout<<"\n";
 	}
-          int r=ba_insert(relid,rec);
+       
+          int r;
+          r=ba_insert(relid,rec);
           //Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
           if(r==0)
           {
 		closeRel(relid);
 		deleteRel(newfilename);
           }
-	if(ch==EOF)
-		break;
+	 if(ch==EOF)	
+                   break;
           }
           closeRel(relid);
 	fclose(file);
 }
 
+int main()
+{
+import("rel1.csv");
+}
