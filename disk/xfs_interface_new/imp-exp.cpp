@@ -179,7 +179,7 @@ void import(char *filename)
           if(r==0)
           {
 		closeRel(relid);
-		deleteRel(newfilename);
+		ba_delete(newfilename);
           }
 	 if(ch==EOF)	
                    break;
