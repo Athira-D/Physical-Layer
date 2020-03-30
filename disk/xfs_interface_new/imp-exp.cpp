@@ -6,7 +6,7 @@ using namespace std;
 #include "block_access.cpp"
 #include "disksimulator.cpp"
 #include "schema.cpp"
-#include "disk_structure.h"
+//#include "disk_structure.h"
 
 //TO DO
 //define constants for INT,FLT,STR
