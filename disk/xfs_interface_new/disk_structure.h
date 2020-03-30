@@ -1,7 +1,9 @@
 #include "../define/constants.h"
+#include "../define/errors.h"
 #include <cstdint>
 
 char OpenRelTable[MAXOPEN][16]={"relcat","attrcat",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+typedef int relId;
 
 struct recBlock {
 	int32_t blockType;
