@@ -1,4 +1,28 @@
-struct Headinfo getheader(int blockNum)
+//ToDo : write getBlockType()
+//review getRecord
+//open rel table null is long int. replace with '\0'?
+//memset in getFreeslot 
+//why are we not setting pblock and rblock after getFreeRecBlock in getFreeSlot
+//in getRelcat do we need the & before relcat_entry or just relcat_entry
+
+/*#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+#include<bits/stdc++.h>
+#include"disk_structure.h"*/
+
+int getBlockType(int blocknum)
+{
+	FILE *disk=fopen("disk","rb");
+	fseek(disk,0,SEEK_SET);
+	unsigned char blockAllocationMap[4*BLOCK_SIZE];
+	fread(blockAllocationMap,4*BLOCK_SIZE,1,disk);
+	fclose(disk);
+	return (int32_t)(blockAllocationMap[blocknum]);
+	
+}
+
+struct HeadInfo getheader(int blockNum)
 {
 	int BlockType=getBlockType(blockNum);
 	struct HeadInfo header;
@@ -15,15 +39,16 @@ int deleteBlock(int curr_block)
 	FILE *disk;
 	disk=fopen("disk","wb+");
 	fseek(disk,BLOCK_SIZE*curr_block,SEEK_SET);
-	fwrite(0,BLOCK_SIZE,1,disk);
+	unsigned char ch= 0;
+	fwrite(&ch,BLOCK_SIZE,1,disk);
 	fclose(disk);
 }
 
-void setheader(struct Headinfo header,int blockNum)
+void setheader(struct HeadInfo *header,int blockNum)
 {
 	FILE *disk=fopen("disk","wb+");
 	fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
-	fwrite(&header,32,1,disk);
+	fwrite(header,32,1,disk);
 	fclose(disk);
 }
 
@@ -36,7 +61,7 @@ void getSlotmap(unsigned char * SlotMap,int blockNum)
 	struct recBlock R;
 	fread(&R,2048,1,disk);
 	int numSlots=R.numSlots;
-	memcpy(SlotMap,R.Slots_Records,numSlots);
+	memcpy(SlotMap,R.slotMap_Records,numSlots);
 	fclose(disk);
 }
 
@@ -72,25 +97,32 @@ recId getFreeSlot(int block_num)
 	//RecBuffer *rec_buffer;
 	//struct HeadInfo header;
 	int num_slots;
-	int iter;
-	
+	int iter,num_attrs;
+	struct HeadInfo header;
 	// finding free slot
-	while(block_num != -1){
+	while(block_num != -1)
+	{
 		//rec_buffer = Buffer::getRecBuffer(block_num);
 		//header = rec_buffer->getheader();
-		struct HeadInfo header=getheader(block_num);
-		num_slots = header.num_slots;
-		next_block_num = header.rblock; // next block
+		header=getheader(block_num);
+		num_slots = header.numSlots;
+		next_block_num = header.rblock; 
+		num_attrs=header.numAttrs;
+		// next block
 		//getting slotmap entries
 		unsigned char slotmap[num_slots];
 		getSlotmap(slotmap,block_num);
 		//searching for free slot in block (block_num)
-		for(iter = 0; iter <  num_slots; iter++){
-			if(slotmap[iter] == 0){
+		int iter;
+		for(iter = 0; iter< num_slots; iter++)
+		{
+			if(slotmap[iter] =='0')
+			{
 				break;
 			}
 		}
-		if(iter < num_slots){
+		if(iter < num_slots)
+		{
 			recid = {block_num, iter};
 			return recid;
 		}
@@ -99,8 +131,9 @@ recId getFreeSlot(int block_num)
 	}
 	
 	//no free slot is found in existing records if block_num = -1
-	int block_num =getFreeRecBlock();
-	if(block_num ==-1){
+	block_num =getFreeRecBlock();
+	if(block_num ==-1)
+	{
 		// no blocks are available in disk
 		return recid; // no free slot can be found
 	}
@@ -108,99 +141,31 @@ recId getFreeSlot(int block_num)
 	//setting header values
 	header = getheader(block_num);
 	header.lblock = prev_block_num;
-	header.num_slots = num_slots;
-	setheader(header,block_num);
+	header.numSlots = num_slots;
+	//was not there before: Athira
+	header.numAttrs=num_attrs;
+	setheader(&header,block_num);
 	//setting slotmap
 	unsigned char slotmap[num_slots];
 	getSlotmap(slotmap,block_num);
-	memset(slotmap, 0, sizeof(slotmap)); //all slots are free
-	setSlotmap(slotmap,block_num);
-	delete rec_buffer;
+	memset(slotmap,'0', sizeof(slotmap)); //all slots are free
+	setSlotmap(slotmap,num_slots,block_num);
+	//delete rec_buffer;
 	//recid
 	recid = {block_num, 0};
 	//setting prev_block_num rblock to new block
-	getheader(prev_block_num);
+	header=getheader(prev_block_num);
 	header.rblock = block_num;
-	setheader(block_num,header);
+	setheader(&header,block_num);
 	return recid;
 }
 
-int getRelCatEntry(int rel_id, RelCatEntry *relcat_entry)
-{
-	if(rel_id< 0 || rel_id>= MAXOPEN)
-		return E_OUTOFBOUND;
-	if(OpenRelTable[rel_id]==NULL)
-		return E_NOTOPEN;
-    char rel_name[16];
-	strcpy(rel_name, rel_table[rel_id]);
-	int (i=0;i<20;i++)
-	{
-		getRecord(relcat_entry,4,i);
-		if(strcmp(relcat_entry.rel_name,rel_name)==0)
-			return SUCCESS;
-			
-	}
-	return FAILURE;
-	
-}
-
- int setRelCatEntry(int rel_id,union Attribute * relcat_entry)
-{
-	if(rel_id< 0 || rel_id>= MAXOPEN)
-		return E_OUTOFBOUND;
-	if(OpenRelTable[rel_id]==NULL)
-		return E_NOTOPEN;
-	char rel_name[16];
-	strcpy(rel_name, rel_table[rel_id]);
-	int (i=0;i<20;i++)
-	{
-		getRecord(relcat_entry,4,i);
-		if(strcmp(relcat_entry.rel_name,rel_name)==0)
-		{
-			setRecord(relcat_entry,4,i);
-			return SUCCESS;
-		}	
-			
-	}
-	
-}
-
-int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry)
-{
-	if(rel_id< 0 || rel_id>= MAXOPEN)
-		return E_OUTOFBOUND;
-	if(OpenRelTable[rel_id]==NULL)
-		return E_NOTOPEN;
-    char rel_name[16];
-	strcpy(rel_name, OpenRelTable[rel_id]);
-	int curr_block=5;
-	int next_block=-1;
-	while(curr_block!=-1)
-	{
-		struct HeadInfo header;
-		getHeader(curr_block,&header);
-		next_block=header.r_block;
-		int (i=0;i<20;i++)
-		{
-			getRecord(attrcat_entry,curr_block,i);
-			if(strcmp(attrcat_entry[0].sval,rel_name)==0)
-			{
-				if(strcmp(attrcat_entry[1].sval,attrname)==0)
-					return SUCCESS;
-			}
-		}
-		curr_block=next_block;
-	}
-	
-	return E_ATTRNOTEXIST;
-	
-}
-
-
-
 int getRecord(union Attribute *rec,int blockNum,int slotNum)
 { 
-	if(slotNum < 0 || slotNum > numOfSlots - 1)
+	struct HeadInfo Header;
+	Header=getheader(blockNum);
+	int numOfSlots=Header.numSlots;
+	if(slotNum < 0 || slotNum > (numOfSlots - 1))
 		return E_OUTOFBOUND;
 	FILE *disk=fopen("disk","rb");
 	int BlockType=getBlockType(blockNum);
@@ -216,7 +181,7 @@ int getRecord(union Attribute *rec,int blockNum,int slotNum)
 	    	return E_FREESLOT;
 		int numAttrs=R.numAttrs;
 		// it should be R.slotmprecords+32+...???
-		memcpy((void)rec,(void*)(R.slotMap_Records+numSlots+(slotNum*numOfAttrs*ATTR_SIZE)), numOfAttrs*16);
+		memcpy(rec,(R.slotMap_Records+numSlots+(slotNum*numAttrs*ATTR_SIZE)), numAttrs*16);
 		fclose(disk);
 		return SUCCESS;
 
@@ -250,6 +215,9 @@ int getRecord(union Attribute *rec,int blockNum,int slotNum)
 
 int setRecord(union Attribute *rec,int blockNum,int slotNum)
 { 
+	struct HeadInfo header=getheader(blockNum);
+	int numOfSlots=header.numSlots;
+
 	if(slotNum < 0 || slotNum > numOfSlots - 1)
 		return E_OUTOFBOUND;
 	FILE *disk=fopen("disk","wb+");
@@ -262,7 +230,7 @@ int setRecord(union Attribute *rec,int blockNum,int slotNum)
 		int numAttrs=R.numAttrs;
 		int numSlots=R.numSlots;
 		fseek(disk,blockNum*BLOCK_SIZE+slotNum*numAttrs,SEEK_SET);
-		fwrite(&rec,numAttrs*ATTR_SIZE,1,disk);
+		fwrite(rec,numAttrs*ATTR_SIZE,1,disk);
 		fclose(disk);
 		return SUCCESS;
 
@@ -297,9 +265,84 @@ int setRecord(union Attribute *rec,int blockNum,int slotNum)
 
 
 
-int ba_insert(int relid, union Attribute *rec){
-	RelCatEntry relcat_entry;
-	AttrCatEntry attrcat_entry;
+int getRelCatEntry(int rel_id, union Attribute *relcat_entry)
+{
+	if(rel_id< 0 || rel_id>= MAXOPEN)
+		return E_OUTOFBOUND;
+	if(OpenRelTable[rel_id]==NULL)
+		return E_NOTOPEN;
+    char rel_name[16];
+	strcpy(rel_name, OpenRelTable[rel_id]);
+	for(int i=0;i<20;i++)
+	{
+		getRecord(relcat_entry,4,i);
+		if(strcmp(relcat_entry[0].sval,rel_name)==0)
+			return SUCCESS;
+			
+	}
+	return FAILURE;
+	
+}
+
+ int setRelCatEntry(int rel_id,union Attribute * relcat_entry)
+{
+	if(rel_id< 0 || rel_id>= MAXOPEN)
+		return E_OUTOFBOUND;
+	if(OpenRelTable[rel_id]==NULL)
+		return E_NOTOPEN;
+	char rel_name[16];
+	strcpy(rel_name, OpenRelTable[rel_id]);
+	for(int i=0;i<20;i++)
+	{
+		getRecord(relcat_entry,4,i);
+		if(strcmp(relcat_entry[0].sval,rel_name)==0)
+		{
+			setRecord(relcat_entry,4,i);
+			return SUCCESS;
+		}	
+			
+	}
+	
+}
+
+int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry)
+{
+	if(rel_id< 0 || rel_id>= MAXOPEN)
+		return E_OUTOFBOUND;
+	if(OpenRelTable[rel_id]==NULL)
+		return E_NOTOPEN;
+    char rel_name[16];
+	strcpy(rel_name, OpenRelTable[rel_id]);
+	int curr_block=5;
+	int next_block=-1;
+	while(curr_block!=-1)
+	{
+		struct HeadInfo header;
+		header= getheader(curr_block);
+		next_block=header.rblock;
+		for(int i=0;i<20;i++)
+		{
+			getRecord(attrcat_entry,curr_block,i);
+			if(strcmp(attrcat_entry[0].sval,rel_name)==0)
+			{
+				if(strcmp(attrcat_entry[1].sval,attrname)==0)
+					return SUCCESS;
+			}
+		}
+		curr_block=next_block;
+	}
+	
+	return E_ATTRNOTEXIST;
+	
+}
+
+
+
+
+int ba_insert(int relid, union Attribute *rec)
+{
+	union Attribute relcat_entry[6];
+	union Attribute attrcat_entry[6];
 	/*int first_block;
 	int num_attrs;
 	int num_slots;
@@ -309,15 +352,16 @@ int ba_insert(int relid, union Attribute *rec){
 	//RecBuffer *rec_buffer;
 	struct HeadInfo header;
 	
-	getRelCatEntry(relid, &relcat_entry);
-	first_block = relcat_entry.first_blk;
-	num_slots = relcat_entry.num_slots_blk;
-	num_attrs = relcat_entry.num_attr;
+	getRelCatEntry(relid, relcat_entry);
+	int first_block = relcat_entry[3].ival;
+	int num_slots = relcat_entry[5].ival;
+	int num_attrs = relcat_entry[1].ival;
 	
 	unsigned char slotmap[num_slots];
 	//getting free slot
-	recid = getFreeSlot(first_block);
-	if(recid.block == -1 && recid.slot == -1){ //free slot can not be found
+	recId recid = getFreeSlot(first_block);
+	if(recid.block == -1 && recid.slot == -1)
+	{ //free slot can not be found
 		return FAILURE;
 	}
 	//rec_buffer = Buffer::getRecBuffer(recid.block);
@@ -326,18 +370,18 @@ int ba_insert(int relid, union Attribute *rec){
 	//rec_buffer->setRecord(rec, recid.slot);
 	setRecord(rec,recid.block, recid.slot);
 	//since record is inserted number of entries is increased by 1
-	getheader();  //arg
-	header.num_entries = header.num_entries + 1; // increased number of entires in block
-	setheader(); //arg
+	header= getheader(recid.block);  //arg
+	header.numEntries = header.numEntries + 1; // increased number of entires in block
+	setheader(&header,recid.block); //arg
 	//rec_buffer->setheader();
 	//settting corresponding slotmap entry as used
-	getSlotmap(slotmap);
+	getSlotmap(slotmap,recid.block);
 	slotmap[recid.slot] = '1';
-	setSlotmap(slotmap);
+	setSlotmap(slotmap,num_slots,recid.block);
 	//delete rec_buffer;
 	//increasing number of entries in relation catalog entry
-	relcat_entry.num_entries = relcat_entry.num_entries + 1;
-	setRelCatEntry(relid, &relcat_entry);
+	relcat_entry[2].ival = relcat_entry[2].ival + 1;
+	setRelCatEntry(relid, relcat_entry);
 	
 	//inserting entries into index block if exits for attributes
 	/*for(iter = 0; iter < num_attrs; iter++){
@@ -350,24 +394,56 @@ int ba_insert(int relid, union Attribute *rec){
 	return SUCCESS;
 }
 
+int compare(union Attribute attr1, union Attribute attr2, int attrType)
+{
+    if (attrType == STRING)
+       return strcmp(attr1.sval, attr2.sval); 
+
+    /* else if attrType == INT -1, 0, 1 depending on whether the value attr1.ival
+       is less than, equal to or greater than the value attr2.ival */ 
+    
+    /* else if attrType==FLOAT return -1, 0, 1 depending on whether the value attr1.fval
+       is less than, equal to or greater than the value attr2.fval */ 
+
+    if (attrType == INT)
+    {
+    	if(attr1.ival<attr2.ival)
+    		return -1;
+    	else if(attr1.ival==attr2.ival)
+    		return 0;
+    	else
+    		return 1;
+    }
+
+    if(attrType==FLOAT)
+    {
+    	if(attr1.fval<attr2.fval)
+    		return -1;
+    	else if(attr1.fval==attr2.fval)
+    		return 0;
+    	else
+    		return 1;
+    }
+    
+}
 
 recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrval, int op, recId * prev_recid)
 {
 	//get the record corresponding to the relation name
 	union Attribute relcat_entry[6];
-	getRelCatEntry(RELCAT_RELID,relcat_entry);
+	getRelCatEntry(relid,relcat_entry);
 	
 	//get the record itself in relcat_entry array of attributes
 	int curr_block,curr_slot,next_block=-1;
 	int no_of_attributes=relcat_entry[1].ival;
 	int no_of_slots=relcat_entry[5].ival;
 	union Attribute attrcat_entry[6];
-	getAttrCatEntry(ATTRCAT_RELID,attrName,attrcat_entry);
+	getAttrCatEntry(relid,attrName,attrcat_entry);
 	int offset= attrcat_entry[5].ival;
 	int attr_type=attrcat_entry[2].ival;
 	recId ret_recid;
 
-	if(prev_recid == {-1, -1})
+	if((prev_recid->block==-1)&& prev_recid->slot==-1)
 	{
 		curr_block = relcat_entry[3].ival;
 		curr_slot = 0;
@@ -376,23 +452,22 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 	else
 	{ 
 		//if the linear search knows the  hit from previous search
-		 curr_block = prev_recid.block;
-		 curr_slot = prev_recid.slot;
+		 curr_block = prev_recid->block;
+		 curr_slot = prev_recid->slot;
 	}
 
 	while(curr_block!=-1)
 	{
 		int i=curr_slot;
 		struct HeadInfo header;
-		getHeader(curr_block,&header);
-		next_block=header.r_block;
+		header= getheader(curr_block);
+		next_block=header.rblock;
 		for(;i<no_of_slots;i++)
 		{
 			union Attribute record[no_of_attributes];
 			int retval=getRecord(record,curr_block,i);
 			if(retval==E_FREESLOT)
 			{
-				curr_slot++;
 				continue;
 			}
 			int flag=compare(attrval,record[offset],attr_type);
@@ -444,17 +519,20 @@ int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE])
 	//search for the relation with name newName in relation catalog 
 	recId prev_recid={-1,-1};
 	recId relcat_recid, attrcat_recid;
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", newName, EQ,&prev_recid);
+	union Attribute temp;
+	strcpy(temp.sval,newName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName",temp, EQ,&prev_recid);
 	//If relation with name newName already exits
-	if(relcat_recid != {-1,-1})
+	if(!((relcat_recid.block==-1)&&(relcat_recid.slot==-1)))
 		return E_RELEXIST;
 	
 	
 	//search for the relation with name oldName in relation catalog 
 	prev_recid={-1,-1};
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", oldName, EQ, &prev_recid);
+	strcpy(temp.sval,oldName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName",temp, EQ, &prev_recid);
 	//If relation with name relName does not exits
-	if(relcat_recid == {-1,-1})
+	if((relcat_recid.block==-1)&&(relcat_recid.slot==-1))
 		return E_RELNOTEXIST;
 	
 	//get the relation catalog record from the relation catalog (recid of the relation catalog record = relcat_recid)
@@ -470,8 +548,8 @@ int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE])
 	prev_recid={-1,-1};
 	while(1)
 	{
-		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", oldName, EQ,&prev_recid);
-		if(attrcat_recid!={-1,-1})
+		attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", temp, EQ,&prev_recid);
+		if(!((attrcat_recid.block==-1)&&(attrcat_recid.slot==-1)))
 		{
 			union Attribute attrcat_record[6];
 			getRecord(attrcat_record,attrcat_recid.block,attrcat_recid.slot);
@@ -492,10 +570,14 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 {
 	//search for the relation with name relName in relation catalog 
 	recId prev_recid={-1,-1};
-	union Attribute relcat_recid,attrcat_recid;
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", relName, EQ,&prev_recid);
+	recId relcat_recid,attrcat_recid;
+	union Attribute attrcat_record[6];
+	union Attribute temp;
+	strcpy(temp.sval,relName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName",temp, EQ,&prev_recid);
 	
-	if(relcat_recid == {-1,-1}){ //If relation with name relName does not exits
+	if((relcat_recid.block==-1) && (relcat_recid.slot==-1))
+	{ //If relation with name relName does not exits
 		return E_RELNOTEXIST;
 	}
 	
@@ -504,8 +586,8 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 	prev_recid={-1,-1};
 	 while(1)
 	{
-	 	attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relName, EQ,&prev_recid);
-	 	if(attrcat_recid!={-1,-1})
+	 	attrcat_recid = linear_search(ATTRCAT_RELID, "RelName",temp, EQ,&prev_recid);
+	 	if(!((attrcat_recid.block==-1) && (attrcat_recid.slot==-1)))
 	 	{
 	 		getRecord(attrcat_record,attrcat_recid.block,attrcat_recid.slot);
 	   		if(strcmp(attrcat_record[1].sval,newName)==0)
@@ -522,8 +604,8 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
     prev_recid={-1,-1};
 	 while(1)
 	{
-	 	attrcat_recid = linear_search(ATTRCAT_RELID, "RelName", relName, EQ, &prev_recid);
-	 	if(attrcat_recid!={-1,-1})
+	 	attrcat_recid = linear_search(ATTRCAT_RELID, "RelName",temp, EQ, &prev_recid);
+	 	if(!((attrcat_recid.block==-1) && (attrcat_recid.slot==-1)))
 	 	{
 	 		getRecord(attrcat_record,attrcat_recid.block,attrcat_recid.slot);
 	   		if(strcmp(attrcat_record[1].sval,oldName)==0)
@@ -546,9 +628,11 @@ int ba_delete(char relName[ATTR_SIZE])
 {
 	/* search for relation with name relName in relation catalog */
 	recId relcat_recid,prev_recid={-1,-1};
-	relcat_recid = linear_search(RELCAT_RELID, "RelName", relName, EQ,&prev_recid);
+	union Attribute temp;
+	strcpy(temp.sval,relName);
+	relcat_recid = linear_search(RELCAT_RELID, "RelName",temp, EQ,&prev_recid);
 	
-	if(relcat_recid == {-1,-1})
+	if((relcat_recid.block==-1) && (relcat_recid.slot==-1))
 	{ //If relation with relName does not exits
 		return E_RELNOTEXIST;
 	}
@@ -570,37 +654,39 @@ int ba_delete(char relName[ATTR_SIZE])
     //Delete all the record blocks of the relation by getting the next record blocks (rblock) from header and by calling
 	while(curr_block!=-1)
 	{
-		struct HeadInfo header=getHeader(curr_block);
+		struct HeadInfo header=getheader(curr_block);
 		next_block=header.rblock;
 		deleteBlock(curr_block);
 		curr_block=next_block;
 	}
 	union Attribute attrcat_rec[6]; recId attrcat_recid;
 	prev_recid={-1,-1};unsigned char slotmap[no_of_slots];int root_block;
-	for(int i=0;i<num_of_attrs;i++)
+	for(int i=0;i<no_of_attrs;i++)
 	{
-		attrcat_recid= linear_search(ATTRCAT_RELID, "RelName", relName, EQ,&prev_recid);
+		
+		attrcat_recid= linear_search(ATTRCAT_RELID, "RelName",temp, EQ,&prev_recid);
 		disk=fopen("disk","wb+");
-		fseek(disk,attrcat_recid*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
-		fwrite(0,16*no_of_attrs,1,disk);
+		fseek(disk,(attrcat_recid.block)*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
+		unsigned char ch=0;
+		fwrite(&ch,16*no_of_attrs,1,disk);
 		fclose(disk);
-		struct HeadInfo header=getHeader(attrcat_recid.block);
+		struct HeadInfo header=getheader(attrcat_recid.block);
 		getSlotmap(slotmap,attrcat_recid.block);
 		slotmap[attrcat_recid.slot]='0';
-		setSlotmap(slotmap,attrcat_recid.block);
+		setSlotmap(slotmap,no_of_slots,attrcat_recid.block);
 		header.numEntries=header.numEntries-1;
 		
 		root_block=attrcat_rec[4].ival;
 		if(root_block != -1)//index exists for the attribute
-			bplus_destroy(root_block); //delete the index blocks corresponding to the attribute	
+			//bplus_destroy(root_block); //delete the index blocks corresponding to the attribute	
 		if(header.numEntries==0)
 		{
-			struct HeadInfo prev_header=getHeader(header.lblock);
+			struct HeadInfo prev_header=getheader(header.lblock);
 			prev_header.rblock=-1;
 		}
 
 
-		setHeader(attrcat_recid.block,&header);	
+		setheader(&header,attrcat_recid.block);	
 	}
 	
 	
@@ -613,49 +699,52 @@ int ba_delete(char relName[ATTR_SIZE])
 	unsigned char relcat_slotmap[20];
 	getSlotmap(relcat_slotmap,RELCAT_RELID);
 	relcat_slotmap[relcat_recid.slot]='0';
-	setSlotmap(relcat_slotmap,relcat_recid.block);
-	struct HeadInfo relcat_header=getHeader(RELCAT_RELID);
+	setSlotmap(relcat_slotmap,20,relcat_recid.block);
+	struct HeadInfo relcat_header=getheader(RELCAT_RELID);
 	relcat_header.numEntries=relcat_header.numEntries-1;
-	setHeader(RELCAT_RELID,&relcat_header);
+	setheader(&relcat_header,4);
 
 	getRecord(relcat_rec,RELCAT_RELID,0);
-	relcat_rec[2]=relcat_rec[2]-1;
+	relcat_rec[2].ival=relcat_rec[2].ival-1;
 	setRecord(relcat_rec,RELCAT_RELID,0);
 	getRecord(relcat_rec,RELCAT_RELID,1);
-	relcat_rec[1]=relcat_rec[1]-no_of_attrs;
+	relcat_rec[1].ival=relcat_rec[1].ival-no_of_attrs;
 	setRecord(relcat_rec,RELCAT_RELID,1);
 	disk=fopen("disk","wb+");
-	fseek(disk,attrcat_recid*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
-	fwrite(0,16*no_of_attrs,1,disk);
+	fseek(disk,(attrcat_recid.block)*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
+	unsigned char ch=0;
+	fwrite(&ch,16*no_of_attrs,1,disk);
 	fclose(disk);
 	return SUCCESS;
 }	 
 
-int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op){
+
+int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op)
+{
 	
 	/*get the attribute catalog entry from the attribute cache corresponding 
 	  to the relation with Id=relid and with attribute_name=attrName using
 	  OpenRelTable::getAttrCatEntry(relid, attrName, &attrcat_entry); of cache layer */
 	//get root_block from the attribute catalog entry (attrcat_entry)
 	union Attribute attrcat_entry[6];
-	getAttrCatEntry(relid,root_block,&attrcat_entry);
-	int root_block=attrcat[4].ival;
+	getAttrCatEntry(relid,attrName,attrcat_entry);
+	int root_block=attrcat_entry[4].ival;
 	recId recid;
-	static prev_recid={-1,-1};
+	static recId prev_recid={-1,-1};
 	if(root_block == -1)
 	{ 	//if Index does not exist for the attribute
 		//search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval  
-		recid = linear_search(relid, attrName, attrVal, op,&prev_recid,&prev_recid);
+		recid = linear_search(relid, attrName, attrval, op,&prev_recid);
 	}
 	else
 	{ //if Index exists for the attribute
 	  //search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval
-		recid = bplus_search(relid, attrName, attval, op,&prev_recid);
+		//recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
 	}
 	
-	if(recid == {-1, -1})
+	if((recid.block==-1) && (recid.slot==-1))
 	{ //if it fails to find a record satisfying the given condition
-		return E_NOTFOUND;
+		return FAILURE;
 	}
 	
 	 //recid.block is the block that contains record
@@ -663,3 +752,8 @@ int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], un
 
 	return SUCCESS;
 }
+
+//dummy main
+/*{
+	return 0;
+}*/
