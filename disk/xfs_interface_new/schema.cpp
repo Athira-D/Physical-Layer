@@ -1,5 +1,10 @@
+//  Note
+// in CreateRel updated no of entries to 0 when relcat entry is created.was not there before.
+
+
 #include "disk_structure.h"
 #include "block_access.cpp"
+
 
 int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
@@ -25,9 +30,10 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
     }
     strcpy(relcatrec[0].strval,relname);
     relcatrec[1].ival=nAttrs;
-    relcatrec[2].ival=-1;//first block=-1 ,earlier it was 0
-    relcatrec[3].ival=-1;
-    relcatrec[4].ival=(2016/(16*nAttrs+1));
+    relcatrec[2].ival=0;
+    relcatrec[3].ival=-1;//first block=-1 ,earlier it was 0
+    relcatrec[4].ival=-1;
+    relcatrec[5].ival=(2016/(16*nAttrs+1));
     flag=ba_insert(0,relcatrec);
     if(flag!=SUCCESS)
     {
@@ -50,7 +56,7 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
             return flag;
         }
     }
-    return SUCCESS;	
+    return SUCCESS; 
 }
 
 int openRel(char RelName[16])
@@ -106,3 +112,4 @@ int closeRel(int relid)    //return 0 on success
     strcpy(OpenRelTable[relid],NULL);
     return 0;
 }
+
