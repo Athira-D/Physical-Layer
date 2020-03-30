@@ -12,7 +12,7 @@ struct recBlock {
 	int32_t numAttrs; 
 	int32_t numSlots;
 	unsigned char reserved[4];
-	unsigned char slotMap_Records[BLOCK_SIZE-104]
+	unsigned char slotMap_Records[BLOCK_SIZE-104];
     unsigned char unused[72];	
 };
 
@@ -70,7 +70,7 @@ struct HeadInfo
 typedef union Attribute{
 	int ival;
 	float fval;
-	char strval[ATTR_SIZE];
+	char sval[ATTR_SIZE];
 }Attribute;
 
 struct InternalEntry{
