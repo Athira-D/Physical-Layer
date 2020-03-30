@@ -1,21 +1,16 @@
 #include "disk_structure.h"
-//E_RELEXIST =0
-int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
+#include "block_access.cpp"
+
+int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
-    //int relcat_entry;
-    //struct RelCatEntry relcat;
-    //OpenRelTable::getRelCatEntry(0,&relcat);
-    //recId targetrelid;
     union Attribute attrval;
-    strcpy(attrval.sval,relname);
+    strcpy(attrval.strval,relname);
     union Attribute relcatrec[6];//relname,#attrs,#records,firstblk,slotsperblk
     int flag=ba_search(0,relcatrec,"RelName", attrval, EQ);
-
     if(flag==SUCCESS)
    {
         return E_RELEXIST; //Relation name already exists.
     }
-
     int iter;
     for(iter=0;iter<nAttrs;iter++)
     {
@@ -28,40 +23,35 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
             }
         }
     }
-
-    strcpy(relcatrec[0].sval,relname);
+    strcpy(relcatrec[0].strval,relname);
     relcatrec[1].ival=nAttrs;
     relcatrec[2].ival=-1;//first block=-1 ,earlier it was 0
     relcatrec[3].ival=-1;
     relcatrec[4].ival=(2016/(16*nAttrs+1));
-
     flag=ba_insert(0,relcatrec);
     if(flag!=SUCCESS)
-   {
+    {
         ba_delete(relname);
         return flag;
     }
-
     for(iter=0;iter<nAttrs;iter++)
-   {
+    {
         union Attribute attrcatrec[6];//relname,attrname,attrtype,primaryflag,rootblk,offset
-        strcpy(attrcatrec[0].sval,relname);
-        strcpy(attrcatrec[1].sval,attrs[iter]);
+        strcpy(attrcatrec[0].strval,relname);
+        strcpy(attrcatrec[1].strval,attrs[iter]);
         attrcatrec[2].ival=attrtype[iter];
         attrcatrec[3].ival=-1;
         attrcatrec[4].ival=-1;
         attrcatrec[5].ival=iter;
-
         flag=ba_insert(1,attrcatrec);
-        if(flag!=SUCCESS){
+        if(flag!=SUCCESS)
+       {
             ba_delete(relname);
             return flag;
         }
     }
     return SUCCESS;	
 }
-
-
 
 int openRel(char RelName[16])
 {
