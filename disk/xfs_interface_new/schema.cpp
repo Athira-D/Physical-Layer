@@ -1,3 +1,4 @@
+#include "disk_structure.h"
 //E_RELEXIST =0
 int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
@@ -62,54 +63,56 @@ int createRel(char relname[],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 
 
 
-
-int openrel(char RelName[16]);
+int openRel(char RelName[16])
 {
-      union Attribute *rec;
-      for(int i=0;i<20;i++)
+      union Attribute rec[6]; //for relation catalog entry
+      int i;
+      for(i=0;i<20;i++)
       {
-        getRecord(rec,4,i);
-          if(strcmp(rec.rel_name,RelName)==0)
-        {
+          getRecord(rec,4,i);
+          if(strcmp(rec[0].strval,RelName)==0)
+          {
                        break;
-        }
-      }
+          }
+       }
        if(i==20)
-      {
-    cout<<"E_RELNOTEXIST";
-          return FAILURE;
-      }
+       {
+           cout<<"E_RELNOTEXIST";
+           return FAILURE;
+       }
        for(i=0;i<12;i++)
-     if(strcmp(RelName,OpenRelTable[i])==0)
-     {       
-        return i;
-     }
+         if(strcmp(RelName,OpenRelTable[i])==0)
+         {       
+            return i;
+         }
        for(i=0;i<12;i++)
        {
-      if(OpenRelTable[i]==NULL)
-      {
-        strcpy(OpenRelTable[i],RelName);
-        return i;   
-      }
+          if(OpenRelTable[i]==NULL)
+          {
+              strcpy(OpenRelTable[i],RelName);
+              return i;   
+          }
        }
        if(i==13)
-       {        cout<<"E_CACHEFULL\n";
-        //or E_CACHEFULL?
-        return -1; 
-       }     
+          {       
+                 cout<<"E_CACHEFULL\n";
+                 //or E_CACHEFULL?
+                 return -1; 
+          }     
 }
 
-int closerel(int relid)
+int closeRel(int relid)    //return 0 on success
 {
-    if(rel_id< 0 || rel_id>= MAXOPEN)
+    if(relid< 0 || relid>= MAXOPEN)
     {
-         cout<<"E_OUTOFBOUND\n";
-                     return E_OUTOFBOUND;
+              cout<<"E_OUTOFBOUND\n";
+              return E_OUTOFBOUND;
     }
-    if(OpenRelTable[i]==NULL)
+    if(OpenRelTable[relid]==NULL)
     {
         cout<<"E_NOTOPEN\n";
         return E_NOTOPEN;
     }   
-          OpenRelTable[i]=NULL;
+    strcpy(OpenRelTable[relid],NULL);
+    return 0;
 }
