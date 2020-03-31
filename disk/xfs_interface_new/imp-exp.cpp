@@ -3,8 +3,6 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-#include "block_access.cpp"
-#include "disksimulator.cpp"
 #include "schema.cpp"
 //#include "disk_structure.h"
 
@@ -92,11 +90,11 @@ void import(char *filename)
 		attribute_type[j][k]='\0';
 		int t=check_type(attribute_type[j]);
 		if(t==0)
-			type[j]=FLT;
+			type[j]=FLOAT;
 		if(t==1)
 			type[j]=INT;
 		if(t==2)
-			type[j]=STR;
+			type[j]=STRING;
 		j++;i++;
 	}
      
@@ -111,8 +109,10 @@ void import(char *filename)
 		}
 	newfilename[loopv]='\0';
           int ret;
-          ret=createRel(newfilename,count,attribute,attribute_type);
-          int relid=openRel(newfilename);
+          //cout<<newfilename<<"\n";
+          //cout<<count<<"\n";
+          ret=createRel(newfilename,count,attribute,type);
+       /*  int relid=openRel(newfilename);
          //Assuming createRel return 1 on success
          if(ret!=1)
     	{
@@ -168,7 +168,7 @@ void import(char *filename)
 		if(type[l]==2)
 		        {
 		        cout<<record_array[l];
-                            strcpy(rec[l].strval,record_array[l]);
+                            strcpy(rec[l].sval,record_array[l]);
 		        }
                     cout<<"\n";
 	}
@@ -184,11 +184,13 @@ void import(char *filename)
 	 if(ch==EOF)	
                    break;
           }
-          closeRel(relid);
+          closeRel(relid);*/
 	fclose(file);
 }
 
 int main()
 {
+createdisk();
+formatdisk();
 import("rel1.csv");
 }

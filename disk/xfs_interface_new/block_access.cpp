@@ -8,8 +8,8 @@
 /*#include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
-#include<bits/stdc++.h>
-#include"disk_structure.h"*/
+#include<bits/stdc++.h>*/
+#include"disksimulator.cpp"
 
 int getBlockType(int blocknum)
 {
@@ -753,7 +753,7 @@ int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], un
 	return SUCCESS;
 }
 
-//dummy main
-/*{
+/*int main
+{
 	return 0;
 }*/

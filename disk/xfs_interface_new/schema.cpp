@@ -2,17 +2,17 @@
 // in CreateRel updated no of entries to 0 when relcat entry is created.was not there before.
 
 
-#include "disk_structure.h"
 #include "block_access.cpp"
 
 
 int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
     union Attribute attrval;
-    strcpy(attrval.strval,relname);
+    strcpy(attrval.sval,relname);
     union Attribute relcatrec[6];//relname,#attrs,#records,firstblk,slotsperblk
     int flag=ba_search(0,relcatrec,"RelName", attrval, EQ);
-    if(flag==SUCCESS)
+    cout<<flag;
+   /* if(flag==SUCCESS)
    {
         return E_RELEXIST; //Relation name already exists.
     }
@@ -28,7 +28,7 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
             }
         }
     }
-    strcpy(relcatrec[0].strval,relname);
+    strcpy(relcatrec[0].sval,relname);
     relcatrec[1].ival=nAttrs;
     relcatrec[2].ival=0;
     relcatrec[3].ival=-1;//first block=-1 ,earlier it was 0
@@ -43,8 +43,8 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
     for(iter=0;iter<nAttrs;iter++)
     {
         union Attribute attrcatrec[6];//relname,attrname,attrtype,primaryflag,rootblk,offset
-        strcpy(attrcatrec[0].strval,relname);
-        strcpy(attrcatrec[1].strval,attrs[iter]);
+        strcpy(attrcatrec[0].sval,relname);
+        strcpy(attrcatrec[1].sval,attrs[iter]);
         attrcatrec[2].ival=attrtype[iter];
         attrcatrec[3].ival=-1;
         attrcatrec[4].ival=-1;
@@ -55,7 +55,7 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
             ba_delete(relname);
             return flag;
         }
-    }
+    }*/
     return SUCCESS; 
 }
 
@@ -66,7 +66,7 @@ int openRel(char RelName[16])
       for(i=0;i<20;i++)
       {
           getRecord(rec,4,i);
-          if(strcmp(rec[0].strval,RelName)==0)
+          if(strcmp(rec[0].sval,RelName)==0)
           {
                        break;
           }

@@ -1,20 +1,18 @@
-#include<iostream>
+
 #include "../define/constants.h"
 #include "disk_structure.h"
-#include<stdio.h>
 
-using namespace std;
-
-void createdisk(){
+void createdisk()
+{
 	//Creates an empty disk
 	FILE *disk = fopen("disk","wb+");
 	int offset = 16*1024*1024; //16MB
 	fseek(disk, 0, SEEK_SET);
 	
-	for(int i=0;i<offset;i++){
+	for(int i=0;i<offset;i++)
+          {
 		fputc(0,disk);
-	}
-	
+	}	
 	fclose(disk);
 	
 }
@@ -28,7 +26,7 @@ void formatdisk(){
 	
 	//first five entries are set to one
 	for(int i=0;i<reserved;i++){
-		fputc(0,disk);
+		fputc(1,disk);
 	}
 	
 	for(int i=reserved;i<offset;i++){
@@ -39,7 +37,8 @@ void formatdisk(){
 
 }
 
-int readblock(void *buffer, int block_no){//args 1.disk block no, 2.memory buffer.
+int readblock(void *buffer, int block_no)
+{         //args 1.disk block no, 2.memory buffer.
 	FILE *disk=fopen("disk","rb");
 	int offset = block_no * BLOCK_SIZE;
 	fseek(disk, offset, SEEK_SET);
@@ -47,7 +46,8 @@ int readblock(void *buffer, int block_no){//args 1.disk block no, 2.memory buffe
 	fclose(disk);
 } 
 
-int writeblock(int block_no, void *buffer){
+int writeblock(int block_no, void *buffer)
+{
 	FILE *disk=fopen("disk","wb");
 	int offset = block_no * BLOCK_SIZE;
 	fseek(disk, offset, SEEK_SET);
@@ -55,7 +55,3 @@ int writeblock(int block_no, void *buffer){
 	fclose(disk);
 }
 
-int main(){
-	createdisk();
-	return 0;
-}
