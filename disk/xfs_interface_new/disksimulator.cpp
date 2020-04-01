@@ -2,6 +2,7 @@
 #include "../define/constants.h"
 #include "disk_structure.h"
 
+
 void createdisk()
 {
 	//Creates an empty disk
@@ -36,6 +37,7 @@ void formatdisk(){
 	fclose(disk);
 
 }
+
 
 int readblock(void *buffer, int block_no)
 {         //args 1.disk block no, 2.memory buffer.

@@ -512,9 +512,11 @@ void meta()
 	//fputc('\0',disk);
 
 
-	fseek(disk,4*2048+52, SEEK_SET);	
-	fputs("RELATION_CATALOG",disk);
-	fputc('\0',disk);
+	fseek(disk,4*2048+52, SEEK_SET);
+          unsigned char ch='R';
+          fputc(ch,disk);
+	//fputs("RELATION_CATALOG",disk);
+	//fputc('\0',disk);
 	fseek(disk,4*2048+68, SEEK_SET);	
 	fputs("6",disk);
 	fputc('\0',disk);

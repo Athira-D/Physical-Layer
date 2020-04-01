@@ -753,6 +753,152 @@ int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], un
 	return SUCCESS;
 }
 
+
+void meta()
+{
+	union Attribute rec[6];
+	struct HeadInfo *H=(struct HeadInfo*)malloc(sizeof(struct HeadInfo));
+	unsigned char *slot_map=(unsigned char*)malloc(sizeof(slot_map));
+    
+	H->blockType=REC;
+	H->pblock=-1;
+	H->lblock=-1;
+	H->rblock=-1;
+	H->numEntries=2;
+	H->numAttrs=6; 
+	H->numSlots=20;
+	setheader(H,4);
+
+	memcpy(slot_map,"11000000000000000000",20);
+	setSlotmap(slot_map,20,4);
+
+	strcpy(rec[0].sval,"RELATION_CATALOG");
+          rec[1].ival=6;
+	rec[2].ival=2;
+	rec[3].ival=4;
+	rec[4].ival=4;
+	rec[5].ival=20;
+	setRecord(rec,4,0);
+	
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          rec[1].ival=6;
+	rec[2].ival=12;
+	rec[3].ival=5;
+	rec[4].ival=5;
+	rec[5].ival=20;
+	setRecord(rec,4,1);
+	
+	H->blockType=REC;
+	H->pblock=-1;
+	H->lblock=-1;
+	H->rblock=-1;
+	H->numEntries=12;
+	H->numAttrs=6; 
+	H->numSlots=20;
+	setheader(H,5);
+	
+	memcpy(slot_map,"11111111111100000000",20);
+	setSlotmap(slot_map,20,5);
+	
+          strcpy(rec[0].sval,"RELATION_CATALOG");
+          strcpy(rec[1].sval,"RELATION_NAME");
+	strcpy(rec[2].sval,"STR");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=0;
+	setRecord(rec,5,0);
+         // getRecord(rec1,5,0);
+         // cout<<rec1[0].sval;     
+
+	strcpy(rec[0].sval,"RELATION_CATALOG");
+          strcpy(rec[1].sval,"#ATTRIBUTES");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=1;
+	setRecord(rec,5,1);
+
+	strcpy(rec[0].sval,"RELATION_CATALOG");
+          strcpy(rec[1].sval,"#RECORDS");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=2;
+	setRecord(rec,5,2);
+	
+	strcpy(rec[0].sval,"RELATION_CATALOG");
+          strcpy(rec[1].sval,"FIRSTBLOCK");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=3;
+	setRecord(rec,5,3);
+	
+	strcpy(rec[0].sval,"RELATION_CATALOG");
+          strcpy(rec[1].sval,"LASTBLOCK");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=4;
+	setRecord(rec,5,4);
+	
+          strcpy(rec[0].sval,"RELATION_CATALOG");
+          strcpy(rec[1].sval,"#SLOTS");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=5;
+	setRecord(rec,5,5);
+	
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          strcpy(rec[1].sval,"RELATION_NAME");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=0;
+	setRecord(rec,5,6);
+	
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          strcpy(rec[1].sval,"ATTRIBUTE_NAME");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=1;
+	setRecord(rec,5,7);
+
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          strcpy(rec[1].sval,"ATTRIBUTE_TYPE");
+	strcpy(rec[2].sval,"STR");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=2;
+	setRecord(rec,5,8);
+
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          strcpy(rec[1].sval,"PRIMARY_FLAG");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=3;
+	setRecord(rec,5,9);
+	
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          strcpy(rec[1].sval,"ROOT_BLOCK");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=4;
+	setRecord(rec,5,10);
+
+	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+          strcpy(rec[1].sval,"OFFSET");
+	strcpy(rec[2].sval,"INT");
+	rec[3].ival=-1;
+	rec[4].ival=-1;
+	rec[5].ival=5;
+	setRecord(rec,5,11);
+	
+}
 /*int main
 {
 	return 0;

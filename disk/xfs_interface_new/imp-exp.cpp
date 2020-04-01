@@ -192,5 +192,6 @@ int main()
 {
 createdisk();
 formatdisk();
+meta();
 import("rel1.csv");
 }
