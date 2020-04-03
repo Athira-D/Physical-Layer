@@ -4,6 +4,7 @@
 //memset in getFreeslot 
 //why are we not setting pblock and rblock after getFreeRecBlock in getFreeSlot
 //in getRelcat do we need the & before relcat_entry or just relcat_entry
+//ToDo: After getFreeslot we should update block allocation map if new block is allocated...needed in ba_insert anyway.
 
 /*#include<stdlib.h>
 #include<stdio.h>
@@ -24,7 +25,7 @@ int getBlockType(int blocknum)
 
 struct HeadInfo getheader(int blockNum)
 {
-	int BlockType=getBlockType(blockNum);
+	//int BlockType=getBlockType(blockNum);
 	struct HeadInfo header;
 	FILE *disk=fopen("disk","rb");
 	fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
@@ -37,7 +38,7 @@ struct HeadInfo getheader(int blockNum)
 int deleteBlock(int curr_block)
 {
 	FILE *disk;
-	disk=fopen("disk","wb+");
+	disk=fopen("disk","wb");
 	fseek(disk,BLOCK_SIZE*curr_block,SEEK_SET);
 	unsigned char ch= 0;
 	fwrite(&ch,BLOCK_SIZE,1,disk);
@@ -46,7 +47,7 @@ int deleteBlock(int curr_block)
 
 void setheader(struct HeadInfo *header,int blockNum)
 {
-	FILE *disk=fopen("disk","wb+");
+	FILE *disk=fopen("disk","wb");
 	fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
 	fwrite(header,32,1,disk);
 	fclose(disk);
@@ -67,7 +68,7 @@ void getSlotmap(unsigned char * SlotMap,int blockNum)
 
 void setSlotmap(unsigned char * SlotMap,int no_of_slots,int blockNum)
 {
-	FILE *disk=fopen("disk","wb+");
+	FILE *disk=fopen("disk","wb");
 	fseek(disk,blockNum*2048+32,SEEK_SET);
 	fwrite(SlotMap,no_of_slots,1,disk);
 	fclose(disk);
@@ -215,21 +216,28 @@ int getRecord(union Attribute *rec,int blockNum,int slotNum)
 
 int setRecord(union Attribute *rec,int blockNum,int slotNum)
 { 
+	cout<<"setrrrr\n";
 	struct HeadInfo header=getheader(blockNum);
 	int numOfSlots=header.numSlots;
+	int numAttrs=header.numAttrs;
+	cout<<numOfSlots;
 
 	if(slotNum < 0 || slotNum > numOfSlots - 1)
 		return E_OUTOFBOUND;
-	FILE *disk=fopen("disk","wb+");
+	cout<<"hereee!!!\n";
+	FILE *disk=fopen("disk","wb");
 	int BlockType=getBlockType(blockNum);
+	cout<<BlockType<<endl;
 	if(BlockType==REC)
 	{
-		struct recBlock R;
+		cout<<"entering setrecord"<<endl;
+		/*struct recBlock R;
 		fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
 		fread(&R,BLOCK_SIZE,1,disk);
 		int numAttrs=R.numAttrs;
-		int numSlots=R.numSlots;
-		fseek(disk,blockNum*BLOCK_SIZE+slotNum*numAttrs,SEEK_SET);
+		int numSlots=R.numSlots;*/
+
+		fseek(disk,blockNum*BLOCK_SIZE+32+numOfSlots+slotNum*numAttrs*ATTR_SIZE,SEEK_SET);
 		fwrite(rec,numAttrs*ATTR_SIZE,1,disk);
 		fclose(disk);
 		return SUCCESS;
@@ -307,6 +315,7 @@ int getRelCatEntry(int rel_id, union Attribute *relcat_entry)
 
 int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry)
 {
+
 	if(rel_id< 0 || rel_id>= MAXOPEN)
 		return E_OUTOFBOUND;
 	if(OpenRelTable[rel_id]==NULL)
@@ -665,7 +674,7 @@ int ba_delete(char relName[ATTR_SIZE])
 	{
 		
 		attrcat_recid= linear_search(ATTRCAT_RELID, "RelName",temp, EQ,&prev_recid);
-		disk=fopen("disk","wb+");
+		disk=fopen("disk","rb+");
 		fseek(disk,(attrcat_recid.block)*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
 		unsigned char ch=0;
 		fwrite(&ch,16*no_of_attrs,1,disk);
@@ -710,7 +719,7 @@ int ba_delete(char relName[ATTR_SIZE])
 	getRecord(relcat_rec,RELCAT_RELID,1);
 	relcat_rec[1].ival=relcat_rec[1].ival-no_of_attrs;
 	setRecord(relcat_rec,RELCAT_RELID,1);
-	disk=fopen("disk","wb+");
+	disk=fopen("disk","rb+");
 	fseek(disk,(attrcat_recid.block)*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
 	unsigned char ch=0;
 	fwrite(&ch,16*no_of_attrs,1,disk);
@@ -756,9 +765,11 @@ int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], un
 
 void meta()
 {
+
+	cout<<"Entered meta"<<endl;
 	union Attribute rec[6];
 	struct HeadInfo *H=(struct HeadInfo*)malloc(sizeof(struct HeadInfo));
-	unsigned char *slot_map=(unsigned char*)malloc(sizeof(slot_map));
+	//unsigned char *slot_map=(unsigned char*)malloc(sizeof(slot_map));
     
 	H->blockType=REC;
 	H->pblock=-1;
@@ -768,9 +779,33 @@ void meta()
 	H->numAttrs=6; 
 	H->numSlots=20;
 	setheader(H,4);
+	cout<<"wrote header\n";
+	struct HeadInfo h= getheader(4);
+	cout<<h.numSlots<<endl;
 
-	memcpy(slot_map,"11000000000000000000",20);
+	unsigned char slot_map[20];
+	for(int i=0;i<20;i++)
+	{
+		if(i==0||i==1)
+			slot_map[i]='1';
+		else
+			slot_map[i]='0';
+	}
 	setSlotmap(slot_map,20,4);
+	cout<<"wrote slotmap\n";
+	unsigned char temp[20];
+	FILE * disk=fopen("disk","rb+");
+	fseek(disk,4*2048+32,SEEK_SET);
+	fread(temp,20,1,disk);
+	for(int i=0;i<20;i++)
+		if(temp[i]=='1')
+			cout<<"hi!!";
+	cout<<endl;
+	/*h= getheader(4);
+	cout<<h.numSlots<<endl;*/
+	fseek(disk,4*2048,SEEK_SET);
+	fread(&h,32,1,disk);
+	cout<<h.numSlots<<endl;
 
 	strcpy(rec[0].sval,"RELATION_CATALOG");
           rec[1].ival=6;
@@ -779,6 +814,8 @@ void meta()
 	rec[4].ival=4;
 	rec[5].ival=20;
 	setRecord(rec,4,0);
+	h= getheader(4);
+	cout<<h.numSlots<<endl;
 	
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           rec[1].ival=6;
@@ -787,7 +824,7 @@ void meta()
 	rec[4].ival=5;
 	rec[5].ival=20;
 	setRecord(rec,4,1);
-	
+	//cout<<"setrecord done\n";
 	H->blockType=REC;
 	H->pblock=-1;
 	H->lblock=-1;
@@ -796,9 +833,18 @@ void meta()
 	H->numAttrs=6; 
 	H->numSlots=20;
 	setheader(H,5);
+	//cout<<"set header\n";
 	
-	memcpy(slot_map,"11111111111100000000",20);
+
+	for(int i=0;i<20;i++)
+	{
+		if(i>=0&&i<=11)
+			slot_map[i]='1';
+		else
+			slot_map[i]='0';
+	}
 	setSlotmap(slot_map,20,5);
+	//cout<<"wrote slotmap\n";
 	
           strcpy(rec[0].sval,"RELATION_CATALOG");
           strcpy(rec[1].sval,"RELATION_NAME");
@@ -807,6 +853,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=0;
 	setRecord(rec,5,0);
+	//cout<<"set record done\n";
          // getRecord(rec1,5,0);
          // cout<<rec1[0].sval;     
 
@@ -817,6 +864,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=1;
 	setRecord(rec,5,1);
+	//cout<<"set record done\n";
 
 	strcpy(rec[0].sval,"RELATION_CATALOG");
           strcpy(rec[1].sval,"#RECORDS");
@@ -825,6 +873,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=2;
 	setRecord(rec,5,2);
+	//cout<<"set record done\n";
 	
 	strcpy(rec[0].sval,"RELATION_CATALOG");
           strcpy(rec[1].sval,"FIRSTBLOCK");
@@ -833,6 +882,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=3;
 	setRecord(rec,5,3);
+	//cout<<"set record done\n";
 	
 	strcpy(rec[0].sval,"RELATION_CATALOG");
           strcpy(rec[1].sval,"LASTBLOCK");
@@ -841,6 +891,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=4;
 	setRecord(rec,5,4);
+	//cout<<"set record done\n";
 	
           strcpy(rec[0].sval,"RELATION_CATALOG");
           strcpy(rec[1].sval,"#SLOTS");
@@ -849,6 +900,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=5;
 	setRecord(rec,5,5);
+	//cout<<"set record done\n";
 	
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           strcpy(rec[1].sval,"RELATION_NAME");
@@ -857,6 +909,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=0;
 	setRecord(rec,5,6);
+	//cout<<"set record done\n";
 	
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           strcpy(rec[1].sval,"ATTRIBUTE_NAME");
@@ -865,6 +918,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=1;
 	setRecord(rec,5,7);
+	//cout<<"set record done\n";
 
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           strcpy(rec[1].sval,"ATTRIBUTE_TYPE");
@@ -873,6 +927,8 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=2;
 	setRecord(rec,5,8);
+	//cout<<"set record done\n";
+
 
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           strcpy(rec[1].sval,"PRIMARY_FLAG");
@@ -881,6 +937,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=3;
 	setRecord(rec,5,9);
+	//cout<<"set record done\n";
 	
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           strcpy(rec[1].sval,"ROOT_BLOCK");
@@ -889,6 +946,7 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=4;
 	setRecord(rec,5,10);
+	//cout<<"set record done\n";
 
 	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
           strcpy(rec[1].sval,"OFFSET");
@@ -897,6 +955,8 @@ void meta()
 	rec[4].ival=-1;
 	rec[5].ival=5;
 	setRecord(rec,5,11);
+	//cout<<"set record done\n";
+	
 	
 }
 /*int main

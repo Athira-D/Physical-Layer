@@ -24,11 +24,17 @@ void formatdisk(){
 	int reserved = 6,offset = 16*1024*1024;
 	
 	fseek(disk, 0, SEEK_SET);
-	
+	unsigned char ch[6];
 	//first five entries are set to one
-	for(int i=0;i<reserved;i++){
-		fputc(1,disk);
+	for(int i=0;i<reserved;i++)
+	{
+		if(i>=0&&i<=3)
+			ch[i]=(unsigned char)1;
+		else
+			ch[i]=(unsigned char)REC;
+		
 	}
+	fwrite(ch,6,1,disk);
 	
 	for(int i=reserved;i<offset;i++){
 		fputc(0,disk);
