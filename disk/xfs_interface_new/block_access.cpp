@@ -811,7 +811,7 @@ void meta()
 	fread(&h,32,1,disk);
 	cout<<h.numSlots<<endl;*/
 
-	strcpy(rec[0].sval,"RELATION_CATALOG");
+	strcpy(rec[0].sval,"RELATIONCAT");
           rec[1].ival=6;
 	rec[2].ival=2;
 	rec[3].ival=4;
@@ -821,7 +821,7 @@ void meta()
 	h= getheader(4);
 	cout<<h.numSlots<<endl;
 	
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
           rec[1].ival=6;
 	rec[2].ival=12;
 	rec[3].ival=5;
@@ -850,8 +850,8 @@ void meta()
 	setSlotmap(slot_map,20,5);
 	//cout<<"wrote slotmap\n";
 	
-          strcpy(rec[0].sval,"RELATION_CATALOG");
-          strcpy(rec[1].sval,"RELATION_NAME");
+    strcpy(rec[0].sval,"RELATIONCAT");
+    strcpy(rec[1].sval,"RelName");
 	strcpy(rec[2].sval,"STRING");
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -861,8 +861,8 @@ void meta()
          // getRecord(rec1,5,0);
          // cout<<rec1[0].sval;     
 
-	strcpy(rec[0].sval,"RELATION_CATALOG");
-          strcpy(rec[1].sval,"#ATTRIBUTES");
+	strcpy(rec[0].sval,"RELATIONCAT");
+          strcpy(rec[1].sval,"#Attributes");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -870,8 +870,8 @@ void meta()
 	setRecord(rec,5,1);
 	//cout<<"set record done\n";
 
-	strcpy(rec[0].sval,"RELATION_CATALOG");
-          strcpy(rec[1].sval,"#RECORDS");
+	strcpy(rec[0].sval,"RELATIONCAT");
+          strcpy(rec[1].sval,"#Records");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -879,8 +879,8 @@ void meta()
 	setRecord(rec,5,2);
 	//cout<<"set record done\n";
 	
-	strcpy(rec[0].sval,"RELATION_CATALOG");
-          strcpy(rec[1].sval,"FIRSTBLOCK");
+	strcpy(rec[0].sval,"RELATIONCAT");
+          strcpy(rec[1].sval,"FirstBlock");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -888,8 +888,8 @@ void meta()
 	setRecord(rec,5,3);
 	//cout<<"set record done\n";
 	
-	strcpy(rec[0].sval,"RELATION_CATALOG");
-          strcpy(rec[1].sval,"LASTBLOCK");
+	strcpy(rec[0].sval,"RELATIONCAT");
+          strcpy(rec[1].sval,"LastBlock");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -897,8 +897,8 @@ void meta()
 	setRecord(rec,5,4);
 	//cout<<"set record done\n";
 	
-          strcpy(rec[0].sval,"RELATION_CATALOG");
-          strcpy(rec[1].sval,"#SLOTS");
+          strcpy(rec[0].sval,"RELATIONCAT");
+          strcpy(rec[1].sval,"#Slots");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -906,8 +906,8 @@ void meta()
 	setRecord(rec,5,5);
 	//cout<<"set record done\n";
 	
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
-          strcpy(rec[1].sval,"RELATION_NAME");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
+          strcpy(rec[1].sval,"RelName");
 	strcpy(rec[2].sval,"STRING");
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -915,8 +915,8 @@ void meta()
 	setRecord(rec,5,6);
 	//cout<<"set record done\n";
 	
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
-          strcpy(rec[1].sval,"ATTRIBUTE_NAME");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
+          strcpy(rec[1].sval,"AttributeName");
 	strcpy(rec[2].sval,"STRING");
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -924,8 +924,8 @@ void meta()
 	setRecord(rec,5,7);
 	//cout<<"set record done\n";
 
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
-          strcpy(rec[1].sval,"ATTRIBUTE_TYPE");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
+          strcpy(rec[1].sval,"AttributeType");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -934,8 +934,8 @@ void meta()
 	//cout<<"set record done\n";
 
 
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
-          strcpy(rec[1].sval,"PRIMARY_FLAG");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
+          strcpy(rec[1].sval,"PrimaryFlag");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -943,8 +943,8 @@ void meta()
 	setRecord(rec,5,9);
 	//cout<<"set record done\n";
 	
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
-          strcpy(rec[1].sval,"ROOT_BLOCK");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
+          strcpy(rec[1].sval,"RootBlock");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -952,8 +952,8 @@ void meta()
 	setRecord(rec,5,10);
 	//cout<<"set record done\n";
 
-	strcpy(rec[0].sval,"ATTRIBUTECATALOG");
-          strcpy(rec[1].sval,"OFFSET");
+	strcpy(rec[0].sval,"ATTRIBUTECAT");
+          strcpy(rec[1].sval,"Offset");
 	rec[2].ival=INT;
 	rec[3].ival=-1;
 	rec[4].ival=-1;
@@ -961,9 +961,9 @@ void meta()
 	setRecord(rec,5,11);
 	//cout<<"set record done\n
 	union Attribute temprec[6];
-	getRecord(temprec,5,10);
+	getRecord(temprec,4,0);
 	cout<<"jhhj";
-	cout<<temprec[0].sval;
+	cout<<temprec[0].sval<<endl;
 	
 	
 }
