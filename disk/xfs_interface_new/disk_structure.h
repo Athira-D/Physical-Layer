@@ -2,7 +2,7 @@
 #include "../define/errors.h"
 #include <cstdint>
 
-char OpenRelTable[MAXOPEN][16]={"relcat","attrcat",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+char OpenRelTable[MAXOPEN][16]={"RELATIONCAT","ATTRIBUTECAT",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 typedef int relId;
 
 struct recBlock {
