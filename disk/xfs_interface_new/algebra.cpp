@@ -1,4 +1,11 @@
 //Todo :  how to check if conversion fails
+/*#include "schema.cpp"
+#include <bits/stdc++.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+using namespace std;*/
 
 int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char strval[ATTR_SIZE])
 {
@@ -13,9 +20,9 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
 
     // get the attribute catalog entry for attr, using getAttrcatEntry() method of cache layer(let it be attrcatentry).
     // if getAttrcatEntry() call fails return E_ATTRNOTEXIST
-    int flag= getAttrcatEntry(src_relid,attr,&attrcat_entry);
+    int flag= getAttrCatEntry(src_relid,attr,attrcat_entry);
     if(flag!=SUCCESS)
-        return E_ATTRNOTEXIST;
+        return flag;
     
 
     //convert strval into union Attribute (let it be val) as shown in the following code:
@@ -38,7 +45,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
         strcpy(val.sval,strval);
     }
     else
-        return E_ATTRTYPEMISMATCH;
+        return E_NATTRMISMATCH;
    
 
     //Next task is to create the destination relation.
@@ -46,14 +53,14 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     //get RelcatEntry of srcrel from cache using getRelCatEntry() method of cache layer.
     //get the no. of attributes present in src relation, from RelcatEntry.(let it be nAttrs)
     union Attribute relcat_entry[6];
-    getRelCatEntry(src_relid,&relcat_entry);
+    getRelCatEntry(src_relid,relcat_entry);
     int nAttrs=relcat_entry[1].ival;
 
     // let attr_name[nAttrs][ATTR_SIZE] be a 2D array of type char(attribute names of rel).
     // let attr_types[nAttrs] be an array of type int
 
     char attr_name[nAttrs][ATTR_SIZE];
-    char attr_types[nAttrs];
+    int attr_types[nAttrs];
 
     /*iterate through 0 to nAttrs-1 :
         get the i'th attribute's AttrCatEntry (using getAttrcatEntry() of cache layer )
@@ -64,13 +71,17 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     for(int i=0;i<nAttrs;i++)
     {
         union Attribute record[6];
-        recid=linear_search(ATTRCAT_RELID,"RelName",OpenRelTable[src_relid],EQ,&prev_recid);
-        if(recid!={-1,-1})
+        union Attribute a;
+        strcpy(a.sval,OpenRelTable[src_relid]);
+        recid=linear_search(ATTRCAT_RELID,"RelName",a,EQ,&prev_recid);
+        if(!((recid.block==-1)&&(recid.slot==-1)))
         {
-            getRecord(&record,recid.block,recid.slot);
+            getRecord(record,recid.block,recid.slot);
             strcpy(attr_name[i],record[1].sval);
             attr_types[i]=record[2].ival;  
         }
+        if((recid.block==-1)&&(recid.slot==-1))
+        	return E_ATTRNOTEXIST;
         
 
     }
@@ -78,7 +89,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     /* let retval= createRel(targetrel,no_of_attrs_srcrel,attr_name,attr_type)
        where createrel is a function in schema layer
        if create fails return retval */
-    int retval=createRel(targetrel,nAttrs,attr_name,attr_type);
+    int retval=createRel(targetrel,nAttrs,attr_name,attr_types);
     if(retval!=SUCCESS)
         return retval;
 
@@ -90,7 +101,10 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     */
     int target_relid=openRel(targetrel);
     if(target_relid==-1)
+    {	
+    	retval=ba_delete(targetrel);
         return -1;
+    }
 
     
     //Note: Before calling the search function, reset the search to start from the first hit
@@ -111,14 +125,15 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     while(1)
     {
         union Attribute record[nAttrs];
-        if(ba_search(src_relid,record,attr,val,op)==SUCCESS)
+        retval=ba_search(src_relid,record,attr,val,op);
+        if(retval==SUCCESS)
         {
-            int retval= ba_insert(target_relid,record);
-            if(retval!=SUCCESS)
+            int ret= ba_insert(target_relid,record);
+            if(ret!=SUCCESS)
             {
                 closeRel(target_relid);
-                int flag= deleteRel(target_relid);
-                return flag;
+                int flag= ba_delete(targetrel);
+                return ret;
 
             }
         }
