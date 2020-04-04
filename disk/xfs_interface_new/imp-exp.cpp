@@ -4,12 +4,12 @@
 using namespace std;
 
 #include "schema.cpp"
-//#include "disk_structure.h"
 
 //TO DO
-//define constants for INT,FLT,STR
 //Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
-//Assuming createRel return 1 on success
+//check in delete blk, delete rel on the type entered in blk allocation map
+//Tell Aparnas team that ECACHEFULL and ERELNOTEXISTS cannot take values from 0 to 11
+
 
 int check_type(char *data)
 {	
@@ -24,13 +24,15 @@ int check_type(char *data)
 		else
 			count_string++;
 	}
-	//printf("%d:%d:%d:%d",count_int,count_dot,count_string,i);
+	
 	if(count_dot==1&&count_int==(strlen(data)-1))
-		return 0; //FLOAT
+		return FLOAT;
 	if(count_int==strlen(data))
-		return 1; //INT
+	{
+		return INT;
+	}
 	else
-		return 2; //STRING
+		return STRING;
 }
 
 void import(char *filename)
@@ -89,11 +91,11 @@ void import(char *filename)
 		}
 		attribute_type[j][k]='\0';
 		int t=check_type(attribute_type[j]);
-		if(t==0)
+		if(t==FLOAT)
 			type[j]=FLOAT;
-		if(t==1)
+		if(t==INT)
 			type[j]=INT;
-		if(t==2)
+		if(t==STRING)
 			type[j]=STRING;
 		j++;i++;
 	}
@@ -109,15 +111,17 @@ void import(char *filename)
 		}
 	newfilename[loopv]='\0';
           int ret;
-          //cout<<newfilename<<"\n";
-          //cout<<count<<"\n";
           ret=createRel(newfilename,count,attribute,type);
-       /*  int relid=openRel(newfilename);
-         //Assuming createRel return 1 on success
-         if(ret!=1)
-    	{
+          if(ret!=SUCCESS)
+	{
 		cout<<"IMPORT NOT POSSIBLE\n";
-                   return;
+		return;
+	}	
+          int relid=openRel(newfilename);
+          if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
+	{
+		cout<<"IMPORT NOT POSSIBLE\n";
+		return;
 	}
 	file=fopen(filename,"r");
 	while((ch = fgetc(file)) != '\n')
@@ -155,36 +159,32 @@ void import(char *filename)
           union Attribute rec[count];
           for(int l=0;l<count;l++)
 	{
-	   	if(type[l]==0)
+	   	if(type[l]==FLOAT)
 		       {
-		       cout<<record_array[l];
-                           rec[l].fval=stof(record_array[l]);
+                           rec[l].fval=atof(record_array[l]);
 		       }
-		if(type[l]==1)
+		if(type[l]==INT)
 		       {
-		       cout<<record_array[l];
-                           rec[l].ival=atoi(record_array[l]);
-		        }
-		if(type[l]==2)
-		        {
-		        cout<<record_array[l];
-                            strcpy(rec[l].sval,record_array[l]);
-		        }
-                    cout<<"\n";
+                           rec[l].ival=strtoull(record_array[l],NULL,10);
+		       }
+		if(type[l]==STRING)
+		       {
+                           strcpy(rec[l].sval,record_array[l]);
+		       }
 	}
-       
-          int r;
+          int r; 
           r=ba_insert(relid,rec);
           //Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
-          if(r==0)
+          if(r!=SUCCESS)
           {
 		closeRel(relid);
 		ba_delete(newfilename);
+                    return;
           }
 	 if(ch==EOF)	
                    break;
           }
-          closeRel(relid);*/
+          closeRel(relid);
 	fclose(file);
 }
 

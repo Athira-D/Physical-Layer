@@ -57,7 +57,7 @@ void setheader(struct HeadInfo *header,int blockNum)
 
 void getSlotmap(unsigned char * SlotMap,int blockNum)
 {
-	FILE *disk=fopen("disk","rb");
+	FILE *disk=fopen("disk","rb+");
 	fseek(disk,blockNum*2048,SEEK_SET);
 	struct recBlock R;
 	fread(&R,2048,1,disk);
@@ -76,17 +76,25 @@ void setSlotmap(unsigned char * SlotMap,int no_of_slots,int blockNum)
 
 int getFreeRecBlock()
 {
-	FILE *disk=fopen("disk","rb");
+	
+	FILE *disk=fopen("disk","rb+");
 	fseek(disk,0,SEEK_SET);
 	unsigned char blockAllocationMap[4*BLOCK_SIZE];
 	fread(blockAllocationMap,4*BLOCK_SIZE,1,disk);
-	fclose(disk);
 	int iter;
 	for(iter=0;iter<4*BLOCK_SIZE;iter++)
 	{
 		if((int32_t)(blockAllocationMap[iter])==UNUSED_BLK)
-				return iter;
+		{
+			//cout<<"in getfreerecblk: "<<"\n";
+			blockAllocationMap[iter]=(unsigned char)REC;
+			fseek(disk,0,SEEK_SET);
+			fwrite(blockAllocationMap,2048*4,1,disk);
+			fclose(disk);
+			return iter;
+		}
 	}
+	
 	return FAILURE;
 
 }
@@ -95,8 +103,6 @@ recId getFreeSlot(int block_num)
 {
 	recId recid = {-1, -1};
 	int prev_block_num, next_block_num;
-	//RecBuffer *rec_buffer;
-	//struct HeadInfo header;
 	int num_slots;
 	int iter,num_attrs;
 	struct HeadInfo header;
@@ -124,6 +130,8 @@ recId getFreeSlot(int block_num)
 		}
 		if(iter < num_slots)
 		{
+			slotmap[iter]=(unsigned char)1;
+			setSlotmap(slotmap,num_slots,block_num);
 			recid = {block_num, iter};
 			return recid;
 		}
@@ -150,6 +158,7 @@ recId getFreeSlot(int block_num)
 	unsigned char slotmap[num_slots];
 	getSlotmap(slotmap,block_num);
 	memset(slotmap,'0', sizeof(slotmap)); //all slots are free
+          slotmap[0]=(unsigned char)1;
 	setSlotmap(slotmap,num_slots,block_num);
 	//delete rec_buffer;
 	//recid
@@ -216,27 +225,28 @@ int getRecord(union Attribute *rec,int blockNum,int slotNum)
 
 int setRecord(union Attribute *rec,int blockNum,int slotNum)
 { 
-	cout<<"setrrrr\n";
+	//cout<<"setrrrr\n";
 	struct HeadInfo header=getheader(blockNum);
 	int numOfSlots=header.numSlots;
 	int numAttrs=header.numAttrs;
-	cout<<numOfSlots;
-
+	//cout<<numOfSlots;
+	
 	if(slotNum < 0 || slotNum > numOfSlots - 1)
 		return E_OUTOFBOUND;
-	cout<<"hereee!!!\n";
-	FILE *disk=fopen("disk","rb+");
+	//cout<<"hereee!!!\n";
+	
 	int BlockType=getBlockType(blockNum);
-	cout<<BlockType<<endl;
+	//cout<<BlockType<<endl;
+          //cout<<"BLOCK "<<blockNum<<"\n";
+	FILE *disk=fopen("disk","rb+");
 	if(BlockType==REC)
 	{
-		cout<<"entering setrecord"<<endl;
 		/*struct recBlock R;
 		fseek(disk,blockNum*BLOCK_SIZE,SEEK_SET);
 		fread(&R,BLOCK_SIZE,1,disk);
 		int numAttrs=R.numAttrs;
 		int numSlots=R.numSlots;*/
-
+		//if(blockNum==5&&slotNum>11)
 		fseek(disk,blockNum*BLOCK_SIZE+32+numOfSlots+slotNum*numAttrs*ATTR_SIZE,SEEK_SET);
 		fwrite(rec,numAttrs*ATTR_SIZE,1,disk);
 		fclose(disk);
@@ -277,9 +287,9 @@ int getRelCatEntry(int rel_id, union Attribute *relcat_entry)
 {
 	if(rel_id< 0 || rel_id>= MAXOPEN)
 		return E_OUTOFBOUND;
-	if(OpenRelTable[rel_id]==NULL)
+	if(strcmp(OpenRelTable[rel_id],"NULL")==0)
 		return E_NOTOPEN;
-    char rel_name[16];
+          char rel_name[16];
 	strcpy(rel_name, OpenRelTable[rel_id]);
 	for(int i=0;i<20;i++)
 	{
@@ -288,29 +298,28 @@ int getRelCatEntry(int rel_id, union Attribute *relcat_entry)
 			return SUCCESS;
 			
 	}
-	return FAILURE;
-	
+	return FAILURE;	
 }
 
  int setRelCatEntry(int rel_id,union Attribute * relcat_entry)
 {
 	if(rel_id< 0 || rel_id>= MAXOPEN)
 		return E_OUTOFBOUND;
-	if(OpenRelTable[rel_id]==NULL)
+	if(strcmp(OpenRelTable[rel_id],"NULL")==0)
 		return E_NOTOPEN;
 	char rel_name[16];
+	
 	strcpy(rel_name, OpenRelTable[rel_id]);
+	union Attribute  relcat_entry1[6];
 	for(int i=0;i<20;i++)
 	{
-		getRecord(relcat_entry,4,i);
-		if(strcmp(relcat_entry[0].sval,rel_name)==0)
-		{
+		getRecord(relcat_entry1,4,i);
+		if(strcmp(relcat_entry1[0].sval,rel_name)==0)
+		{	
 			setRecord(relcat_entry,4,i);
 			return SUCCESS;
-		}	
-			
+		}			
 	}
-	
 }
 
 int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry)
@@ -318,9 +327,9 @@ int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry
 
 	if(rel_id< 0 || rel_id>= MAXOPEN)
 		return E_OUTOFBOUND;
-	if(OpenRelTable[rel_id]==NULL)
+	if(strcmp(OpenRelTable[rel_id],"NULL")==0)
 		return E_NOTOPEN;
-    char rel_name[16];
+          char rel_name[16];
 	strcpy(rel_name, OpenRelTable[rel_id]);
 	int curr_block=5;
 	int next_block=-1;
@@ -332,6 +341,7 @@ int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry
 		for(int i=0;i<20;i++)
 		{
 			getRecord(attrcat_entry,curr_block,i);
+			//cout<<"rel name: "<<attrcat_entry[0].sval<<"\n";
 			if(strcmp(attrcat_entry[0].sval,rel_name)==0)
 			{
 				if(strcmp(attrcat_entry[1].sval,attrname)==0)
@@ -340,66 +350,61 @@ int getAttrCatEntry(int rel_id, char attrname[16],union Attribute *attrcat_entry
 		}
 		curr_block=next_block;
 	}
-	
 	return E_ATTRNOTEXIST;
 	
 }
 
 
-
-
 int ba_insert(int relid, union Attribute *rec)
 {
-	union Attribute relcat_entry[6];
 	union Attribute attrcat_entry[6];
-	/*int first_block;
-	int num_attrs;
-	int num_slots;
-	int root_block;
-	recId recid;
-	int iter;*/
-	//RecBuffer *rec_buffer;
 	struct HeadInfo header;
-	
+	union Attribute relcat_entry[6];
+
 	getRelCatEntry(relid, relcat_entry);
 	int first_block = relcat_entry[3].ival;
 	int num_slots = relcat_entry[5].ival;
 	int num_attrs = relcat_entry[1].ival;
-	
 	unsigned char slotmap[num_slots];
-	//getting free slot
-	recId recid = getFreeSlot(first_block);
-	if(recid.block == -1 && recid.slot == -1)
-	{ //free slot can not be found
+	int blkno=first_block;
+	if(int(first_block)==-1)
+	{        
+	          blkno=getFreeRecBlock();
+		relcat_entry[3].ival=blkno;
+		struct HeadInfo *H=(struct HeadInfo*)malloc(sizeof(struct HeadInfo));
+		H->blockType=REC;
+		H->pblock=-1;
+		H->lblock=-1;
+		H->rblock=-1;
+		H->numEntries=0;
+		H->numAttrs=num_attrs; 
+		H->numSlots=num_slots;
+                    setheader(H,blkno);
+		getSlotmap(slotmap,blkno);
+	          memset(slotmap,'0', sizeof(slotmap)); //all slots are free
+                    setSlotmap(slotmap,num_slots,blkno);
+	}
+	
+	recId recid = getFreeSlot(blkno);
+	relcat_entry[4].ival=recid.block;
+	//cout<<"blk no: "<<relcat_entry[4].ival<<" ";
+	setRelCatEntry(relid, relcat_entry);
+          getRelCatEntry(relid, relcat_entry);
+          //cout<<relcat_entry[3].ival<<"\n";
+           if(recid.block == -1 && recid.slot == -1)
+	{         //free slot can not be found
 		return FAILURE;
 	}
-	//rec_buffer = Buffer::getRecBuffer(recid.block);
-	//header = rec_buffer->getheader();
-	//inserting record in the free slot given by getFreSlot
-	//rec_buffer->setRecord(rec, recid.slot);
 	setRecord(rec,recid.block, recid.slot);
+	
 	//since record is inserted number of entries is increased by 1
 	header= getheader(recid.block);  //arg
 	header.numEntries = header.numEntries + 1; // increased number of entires in block
 	setheader(&header,recid.block); //arg
-	//rec_buffer->setheader();
-	//settting corresponding slotmap entry as used
-	getSlotmap(slotmap,recid.block);
-	slotmap[recid.slot] = '1';
-	setSlotmap(slotmap,num_slots,recid.block);
-	//delete rec_buffer;
+	
 	//increasing number of entries in relation catalog entry
 	relcat_entry[2].ival = relcat_entry[2].ival + 1;
 	setRelCatEntry(relid, relcat_entry);
-	
-	//inserting entries into index block if exits for attributes
-	/*for(iter = 0; iter < num_attrs; iter++){
-		OpenRelTable::getAttrCatEntry(relid, iter, &attrcat_entry);
-		if(attrcat_entry.root_block != -1){ //if index presents for the attribute
-			bplus_insert(relid, attrcat_entry.attr_name, rec[iter], recid); //inserting bplus tree
-			/* WRITE FAILURE CONDITION */
-
-	
 	return SUCCESS;
 }
 
@@ -713,12 +718,12 @@ int ba_delete(char relName[ATTR_SIZE])
 	relcat_header.numEntries=relcat_header.numEntries-1;
 	setheader(&relcat_header,4);
 
-	getRecord(relcat_rec,RELCAT_RELID,0);
+	getRecord(relcat_rec,4,0);
 	relcat_rec[2].ival=relcat_rec[2].ival-1;
-	setRecord(relcat_rec,RELCAT_RELID,0);
-	getRecord(relcat_rec,RELCAT_RELID,1);
-	relcat_rec[1].ival=relcat_rec[1].ival-no_of_attrs;
-	setRecord(relcat_rec,RELCAT_RELID,1);
+	setRecord(relcat_rec,4,0);
+	getRecord(relcat_rec,4,1);
+	relcat_rec[2].ival=relcat_rec[2].ival-no_of_attrs;
+	setRecord(relcat_rec,4,1);
 	disk=fopen("disk","rb+");
 	fseek(disk,(attrcat_recid.block)*BLOCK_SIZE+32+no_of_slots+attrcat_recid.slot*no_of_attrs*ATTR_SIZE,SEEK_SET);
 	unsigned char ch=0;
@@ -758,15 +763,13 @@ int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], un
 	
 	 //recid.block is the block that contains record
 	getRecord(record, recid.block,recid.slot); //recid.slot is the slot that contains record
-
 	return SUCCESS;
 }
 
 
 void meta()
 {
-
-	cout<<"Entered meta"<<endl;
+          struct HeadInfo h;
 	union Attribute rec[6];
 	struct HeadInfo *H=(struct HeadInfo*)malloc(sizeof(struct HeadInfo));
 	//unsigned char *slot_map=(unsigned char*)malloc(sizeof(slot_map));
@@ -779,10 +782,7 @@ void meta()
 	H->numAttrs=6; 
 	H->numSlots=20;
 	setheader(H,4);
-	cout<<"wrote header\n";
-	struct HeadInfo h= getheader(4);
-	cout<<h.numSlots<<endl;
-
+	
 	unsigned char slot_map[20];
 	for(int i=0;i<20;i++)
 	{
@@ -792,7 +792,6 @@ void meta()
 			slot_map[i]='0';
 	}
 	setSlotmap(slot_map,20,4);
-	cout<<"wrote slotmap\n";
 	unsigned char temp[20];
 	/*FILE * disk=fopen("disk","rb+");
 	fseek(disk,4*2048+32,SEEK_SET);
@@ -801,12 +800,6 @@ void meta()
 		if(temp[i]=='1')
 			cout<<"hi!!";
 	cout<<endl;*/
-	getSlotmap(temp,4);
-	for(int i=0;i<20;i++)
-		cout<<temp[i];
-	cout<<endl;
-	h= getheader(4);
-	cout<<h.numSlots<<endl;
 	/*fseek(disk,4*2048,SEEK_SET);
 	fread(&h,32,1,disk);
 	cout<<h.numSlots<<endl;*/
@@ -818,8 +811,6 @@ void meta()
 	rec[4].ival=4;
 	rec[5].ival=20;
 	setRecord(rec,4,0);
-	h= getheader(4);
-	cout<<h.numSlots<<endl;
 	
 	strcpy(rec[0].sval,"ATTRIBUTECAT");
           rec[1].ival=6;
@@ -850,16 +841,15 @@ void meta()
 	setSlotmap(slot_map,20,5);
 	//cout<<"wrote slotmap\n";
 	
-    strcpy(rec[0].sval,"RELATIONCAT");
-    strcpy(rec[1].sval,"RelName");
+          strcpy(rec[0].sval,"RELATIONCAT");
+          strcpy(rec[1].sval,"RelName");
 	strcpy(rec[2].sval,"STRING");
 	rec[3].ival=-1;
 	rec[4].ival=-1;
 	rec[5].ival=0;
 	setRecord(rec,5,0);
 	//cout<<"set record done\n";
-         // getRecord(rec1,5,0);
-         // cout<<rec1[0].sval;     
+         
 
 	strcpy(rec[0].sval,"RELATIONCAT");
           strcpy(rec[1].sval,"#Attributes");
@@ -960,13 +950,9 @@ void meta()
 	rec[5].ival=5;
 	setRecord(rec,5,11);
 	//cout<<"set record done\n
-	union Attribute temprec[6];
-	getRecord(temprec,4,0);
-	cout<<"jhhj";
-	cout<<temprec[0].sval<<endl;
-	
 	
 }
+
 /*int main
 {
 	return 0;

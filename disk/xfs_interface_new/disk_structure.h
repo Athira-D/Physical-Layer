@@ -1,11 +1,10 @@
 #include "../define/constants.h"
 #include "../define/errors.h"
 #include <cstdint>
-
-char OpenRelTable[MAXOPEN][16]={"RELATIONCAT","ATTRIBUTECAT",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+                                                                                                              
 typedef int relId;
-
-struct recBlock {
+char OpenRelTable[MAXOPEN][16]={"RELATIONCAT","ATTRIBUTECAT","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"};
+struct recBlock {                                                                                                                                                                                                  
 	int32_t blockType;
 	int32_t pblock;
 	int32_t lblock;
@@ -70,7 +69,7 @@ struct HeadInfo
 };
 
 typedef union Attribute{
-	int ival;
+          long long int ival;
 	float fval;
 	char sval[ATTR_SIZE];
 }Attribute;
