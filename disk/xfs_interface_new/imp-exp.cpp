@@ -188,10 +188,117 @@ void import(char *filename)
 	fclose(file);
 }
 
+void exp(char *rel_name,char *exportname)
+{
+	FILE *fp_export=fopen(exportname,"w");
+	struct HeadInfo header;
+          int i,first_block;
+	union Attribute rec[6]; //for relation catalog entry
+	int num_slots,next_block_num,num_attrs,no_attrs;
+     	for(i=0;i<20;i++)
+      	{
+        	       getRecord(rec,4,i);
+                 if(strcmp(rec[0].sval,rel_name)==0)
+                 {     
+		   first_block = rec[3].ival;
+		   no_attrs=rec[1].ival;     
+                       break;
+                 }
+      	}
+     	if(i==20)
+       	{
+       	        cout<<"EXPORT NOT POSSIBLE!\n";
+	        return;
+     	}
+	if(first_block==-1)
+	{
+		cout<<"No records exist!\n";
+		return;
+	}
+
+	union Attribute attr[6];
+	int attr_blk=5;
+	char Attr_name[no_attrs][16];
+	int Attr_type[no_attrs];
+          int j=0;
+	while(attr_blk != -1)
+	{
+		header=getheader(attr_blk);
+		next_block_num = header.rblock; 
+		for(i=0;i<20;i++)
+      		{
+        	    	     getRecord(attr,attr_blk,i);
+               	     if(strcmp(attr[0].sval,rel_name)==0)
+                	     {     
+		   	strcpy(Attr_name[j],attr[1].sval); 
+                      	Attr_type[j++]=attr[2].ival;
+               	     }
+      		}
+		attr_blk = next_block_num;
+	}
+          for(j=0;j<no_attrs;j++)
+	{         
+		fputs(Attr_name[j],fp_export);
+		if(j!=no_attrs-1)
+		fputs(",",fp_export);
+	}
+	fputs("\n",fp_export);
+          int block_num=first_block;
+	while(block_num != -1)
+	{
+		header=getheader(block_num);
+		num_slots = header.numSlots;
+		next_block_num = header.rblock; 
+		num_attrs=header.numAttrs;
+		unsigned char slotmap[num_slots];
+		getSlotmap(slotmap,block_num);
+
+		union Attribute A[num_attrs];
+		int iter;
+		for(iter = 0; iter< num_slots; iter++)
+		{
+			if(slotmap[iter] ==(unsigned char)1)
+			{
+				getRecord(A,block_num,iter);
+				char s[16];
+				for(int l=0;l<no_attrs;l++)
+				{
+	   				if(Attr_type[l]==FLOAT)
+		      	 		{
+						sprintf(s, "%f",A[l].fval );
+						//cout<<s<<" "<<strlen(s)<<"\n";
+						fputs(s,fp_export); 
+		       			}
+					if(Attr_type[l]==INT)
+		     			{
+						sprintf(s, "%lld",A[l].ival );
+						//cout<<s<<" "<<strlen(s)<<"\n";
+						fputs(s,fp_export); 
+		      			}
+					if(Attr_type[l]==STRING)
+		     		          {
+                         				 fputs(A[l].sval,fp_export);
+		    		          }
+					if(l!=no_attrs-1)
+					     fputs(",",fp_export);
+				}				
+				fputs("\n",fp_export);
+			}
+		}
+		block_num = next_block_num;
+	}
+	fclose(fp_export);
+}
+
+
 int main()
 {
 createdisk();
 formatdisk();
 meta();
 import("rel1.csv");
+exp("rel1","rel2");
+
 }
+
+

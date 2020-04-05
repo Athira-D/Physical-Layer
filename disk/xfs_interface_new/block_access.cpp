@@ -953,7 +953,3 @@ void meta()
 	
 }
 
-/*int main
-{
-	return 0;
-}*/
