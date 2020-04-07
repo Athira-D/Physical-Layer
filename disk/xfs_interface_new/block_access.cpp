@@ -42,9 +42,11 @@ int deleteBlock(int curr_block)
 	disk=fopen("disk","rb+");
 	fseek(disk,BLOCK_SIZE*curr_block,SEEK_SET);
 	unsigned char ch= 0;
-	fwrite(&ch,BLOCK_SIZE,1,disk);
+	for(int i=0;i<BLOCK_SIZE;i++)
+		fputc(0,disk);
+	//fwrite(&ch,BLOCK_SIZE,1,disk);
 	fseek(disk,curr_block,SEEK_SET);
-	fputc(0,disk);
+	fputc((unsigned char)UNUSED_BLK,disk);
 	fclose(disk);
 }
 
