@@ -6,6 +6,12 @@
 
 int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
+    //cout<<"in create rel..."<<endl;
+    /*for(int i=0;i<nAttrs;i++)
+    {
+      cout<<attrtype[i]<<" ";
+    }
+    cout<<endl;*/
     union Attribute attrval;union Attribute relcat_rec[6];
     strcpy(attrval.sval,relname);
     union Attribute relcatrec[6];//relname,#attrs,#records,firstblk,slotsperblk
@@ -34,9 +40,6 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
     relcatrec[4].ival=-1;
     relcatrec[5].ival=(2016/(16*nAttrs+1));
     flag=ba_insert(0,relcatrec);
-    getRecord(relcat_rec,4,0);
-    relcat_rec[2].ival=relcat_rec[2].ival+1;
-    setRecord(relcat_rec,4,0);
 	
     if(flag!=SUCCESS)
     {
@@ -53,9 +56,6 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
         attrcatrec[4].ival=-1;
         attrcatrec[5].ival=iter;
         flag=ba_insert(1,attrcatrec);
-       getRecord(relcat_rec,4,1);
-       relcat_rec[2].ival=relcat_rec[2].ival+1;
-       setRecord(relcat_rec,4,1);
         if(flag!=SUCCESS)
        {
             ba_delete(relname);
