@@ -4,6 +4,7 @@
 #include "block_access.cpp"
 
 
+
 int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
     //cout<<"in create rel..."<<endl;
@@ -112,5 +113,13 @@ int closeRel(int relid)    //return 0 on success
     }   
     strcpy(OpenRelTable[relid],"NULL");
     return 0;
+}
+
+int getRelId(char relname[16])
+{
+  for(int i=0;i<12;i++)
+    if(strcmp(OpenRelTable[i],relname)==0)
+      return i;
+    return E_NOTOPEN;
 }
 

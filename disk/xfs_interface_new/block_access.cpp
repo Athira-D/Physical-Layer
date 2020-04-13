@@ -135,7 +135,7 @@ recId getFreeSlot(int block_num)
 		}
 		if(iter < num_slots)
 		{
-			slotmap[iter]=(unsigned char)1;
+			slotmap[iter]='1';
 			setSlotmap(slotmap,num_slots,block_num);
 			recid = {block_num, iter};
 			return recid;
@@ -163,7 +163,7 @@ recId getFreeSlot(int block_num)
 	unsigned char slotmap[num_slots];
 	getSlotmap(slotmap,block_num);
 	memset(slotmap,'0', sizeof(slotmap)); //all slots are free
-          slotmap[0]=(unsigned char)1;
+          slotmap[0]='1';
 	setSlotmap(slotmap,num_slots,block_num);
 	//delete rec_buffer;
 	//recid
@@ -372,7 +372,7 @@ int ba_insert(int relid, union Attribute *rec)
 	int num_attrs = relcat_entry[1].ival;
 	unsigned char slotmap[num_slots];
 	int blkno=first_block;
-	if(int(first_block)==-1)
+	if(first_block==-1)
 	{        
 	          blkno=getFreeRecBlock();
 		relcat_entry[3].ival=blkno;

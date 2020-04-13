@@ -17,5 +17,14 @@ struct recBlock {
 
  int main()
  {
- 	 cout<<sizeof(struct recBlock);
+ 	 //cout<<sizeof(struct recBlock);
+ 	 unsigned char ch=(unsigned char)1;
+ 	 if(ch=='1')
+ 	 	cout<<"yesss";
+ 	 //cout<<(unsigned char)1;
+ 	 cout<<(int)ch<<endl;
+ 	 unsigned char ch1[5];
+ 	 ch1[1]='1';
+ 	 if((int32_t*)(ch1+1)==1)
+ 	 	cout<<"yes";
  }

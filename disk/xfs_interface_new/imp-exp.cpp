@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "schema.cpp"
+//#include "algebra.cpp"
 
 //TO DO
 //Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
@@ -190,13 +191,14 @@ void import(char *filename)
 
 void exp(char *rel_name,char *exportname)
 {
+	//cout<<"here\n";
 	FILE *fp_export=fopen(exportname,"w");
 	struct HeadInfo header;
           int i,first_block;
 	union Attribute rec[6]; //for relation catalog entry
 	int num_slots,next_block_num,num_attrs,no_attrs;
      	for(i=0;i<20;i++)
-      	{
+      	{			//cout<<"entered\n";
         	       getRecord(rec,4,i);
                  if(strcmp(rec[0].sval,rel_name)==0)
                  {     
@@ -205,6 +207,7 @@ void exp(char *rel_name,char *exportname)
                        break;
                  }
       	}
+      	//cout<<"exited\n";
      	if(i==20)
        	{
        	        cout<<"EXPORT NOT POSSIBLE!\n";
@@ -257,7 +260,7 @@ void exp(char *rel_name,char *exportname)
 		int iter;
 		for(iter = 0; iter< num_slots; iter++)
 		{
-			if(slotmap[iter] ==(unsigned char)1)
+			if(slotmap[iter] =='1')
 			{
 				getRecord(A,block_num,iter);
 				char s[16];
@@ -296,8 +299,26 @@ int main()
 createdisk();
 formatdisk();
 meta();
-import("rel1.csv");
-exp("rel1","rel2");
+//cout<<"Importing..\n";
+//import("rel1.csv");
+////cout<<"import done\n";
+union Attribute a[6];
+for(int i=0;i<20;i++)
+{getRecord(a,5,i);
+cout<<a[0].sval<<" "<<a[1].sval<<" "<<a[2].ival<<" "<<a[3].ival<<" "<<a[4].ival<<" "<<a[5].ival<<endl;
+}
+//cout<<"Exporting\n";
+exp("ATTRIBUTECAT","rel3");
+//getRecord(a,5,15);
+//cout<<"dddddd\n";
+//cout<<a[0].sval<<endl;
+
+//cout<<"Deleting...\n";
+ //ba_delete("rel1");
+//cout<<"jjjj\n";
+//exp("rel1","rel2");
+
+
 
 }
 

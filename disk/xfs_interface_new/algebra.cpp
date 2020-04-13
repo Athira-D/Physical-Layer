@@ -13,7 +13,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     // get the srcrel's open relation id(let it be srcrelid), using getRelId() method of cache layer
     // if srcrel is not open in open relation table, return E_RELNOTOPEN
 
-    int src_relid=getRelid(srcrel);
+    int src_relid=getRelId(srcrel);
     if(src_relid==FAILURE)
         return E_RELNOTOPEN;
     union Attribute attrcat_entry[6];
@@ -148,3 +148,75 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     return SUCCESS;
     
     }
+
+
+
+int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, char tar_attrs[][ATTR_SIZE], char attr[ATTR_SIZE], int op, char val[ATTR_SIZE])
+{
+    int srcrelid,targetrelid;
+    int flag,iter;
+
+    srcrelid=getRelId(srcrel);
+    if(srcrelid==E_NOTOPEN)
+    {
+        return E_NOTOPEN; // src relation not opened
+    }
+
+    union Attribute srcrelcat[6];
+    flag=getRelCatEntry(srcrelid,srcrelcat);
+    int nAttrs=srcrelcat[1].ival;
+    
+    int attr_offset[tar_nAttrs];
+    int attr_type[tar_nAttrs];
+
+    for(iter=0;iter<tar_nAttrs;iter++)
+    {
+        union Attribute attrcat[6];
+        flag=getAttrCatEntry(srcrelid,tar_attrs[iter],attrcat);
+        if(flag!=SUCCESS)
+        {
+            return flag; // attribute not in src rel.
+        }
+        attr_offset[iter]=attrcat[5].ival;
+        attr_type[iter]=attrcat[2].ival;
+    }
+
+    flag=createRel(targetrel,tar_nAttrs,tar_attrs,attr_type);
+    if(flag!=SUCCESS)
+    {
+        return flag; // unable to create target relation
+    }
+
+    targetrelid=openRel(targetrel);
+    if(targetrelid==E_CACHEFULL)
+    {
+        flag=ba_delete(targetrel);
+        return E_CACHEFULL;
+    }
+
+    while(1)
+    {
+        union Attribute rec[nAttrs];
+        flag=ba_search(srcrelid,rec,attr,val,op);
+        if(flag=SUCCESS)
+        {
+            union Attribute proj_rec[tar_nAttrs];
+
+            for(iter=0;iter<tar_nAttrs;iter++){
+                proj_rec[iter]=rec[attr_offset[iter]];
+            }
+            flag=ba_insert(targetrelid,proj_rec);
+            if(flag!=SUCCESS)
+            {
+                closeRel(targetrel);
+                ba_delete(targetrel);
+                return flag; //unable to insert into target relation.
+            }
+        }
+        else
+            break;
+        
+    }
+    closeRel(targetrel);
+    return SUCCESS;
+}
