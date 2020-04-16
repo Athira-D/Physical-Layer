@@ -7,7 +7,7 @@ using namespace std;
 //#include "algebra.cpp"
 
 //TO DO
-//Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
+//make sure relation catalog and attribute catalog cannot be changed by delete,rename etc
 //check in delete blk, delete rel on the type entered in blk allocation map
 //Tell Aparnas team that ECACHEFULL and ERELNOTEXISTS cannot take values from 0 to 11
 
@@ -134,6 +134,8 @@ void import(char *filename)
           while(1)
 	{
 	ch= fgetc(file);
+	 if(ch==EOF)	
+                   break;
           len=1;
 	while((ch  != '\n')&&(ch!=EOF)) 
 	 {
@@ -175,6 +177,9 @@ void import(char *filename)
 	}
           int r; 
           r=ba_insert(relid,rec);
+	union Attribute attr5[6];
+	getRecord(attr5,4,3);
+	
           //Assuming insert function returns 1 for successsful insert and 0 for unsuccessful insert
           if(r!=SUCCESS)
           {
@@ -293,33 +298,295 @@ void exp(char *rel_name,char *exportname)
 	fclose(fp_export);
 }
 
+void dump_attrcat()
+{
+	FILE *fp_export=fopen("attribute_catalog","w");
+	union Attribute attr[6];
+	int attr_blk=5;
+	char Attr_name[6][16];
+          int j=0;
+	struct HeadInfo h;
+	char s[16];
+	while(attr_blk != -1)
+	{
+		h=getheader(attr_blk);
+		sprintf(s, "%d",h.blockType );
+		fputs(s,fp_export); 
+		fputs(",",fp_export);
+		sprintf(s, "%d",h.pblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.lblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.rblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numEntries);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numAttrs);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numSlots);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+
+		
+		unsigned char slotmap[h.numSlots];
+		getSlotmap(slotmap,attr_blk);
+		for(int k=0;k<20;k++)
+		{
+		    char ch[2];
+		  ch[0]=slotmap[k];
+		    fputs(ch,fp_export); 
+		}
+		fputs("\n",fp_export);
+	          
+		for(int i=0;i<20;i++)
+      		{
+		    
+        	    	     getRecord(attr,attr_blk,i);
+		     if((char)slotmap[i]=='0')
+		     {
+			strcpy(attr[0].sval,"NULL");
+			strcpy(attr[1].sval,"NULL");
+		     }
+		      fputs(attr[0].sval,fp_export); 
+		     fputs(",",fp_export);
+	                 fputs(attr[1].sval,fp_export); 
+		     fputs(",",fp_export);
+               	     sprintf(s, "%d",attr[2].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[3].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[4].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[5].ival);
+	               fputs(s,fp_export); 
+		     fputs("\n",fp_export);
+      		} 
+		attr_blk =h.rblock;
+	}
+}
+
+void dump_relcat()
+{
+	FILE *fp_export=fopen("relation_catalog","w");
+	union Attribute attr[6];
+	int attr_blk=4;
+	char Attr_name[6][16];
+          int j=0;
+	struct HeadInfo h;
+	char s[16];
+
+		h=getheader(attr_blk);
+		sprintf(s, "%d",h.blockType );
+		fputs(s,fp_export); 
+		fputs(",",fp_export);
+		sprintf(s, "%d",h.pblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.lblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.rblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numEntries);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numAttrs);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numSlots);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+
+		
+		unsigned char slotmap[h.numSlots];
+		getSlotmap(slotmap,attr_blk);
+		for(int k=0;k<20;k++)
+		{
+		    char ch[2];
+		  ch[0]=slotmap[k];
+		    fputs(ch,fp_export); 
+		}
+		fputs("\n",fp_export);
+	          
+		for(int i=0;i<20;i++)
+      		{
+        	    	     getRecord(attr,attr_blk,i);
+		     if((char)slotmap[i]=='0')
+			strcpy(attr[0].sval,"NULL");
+		     fputs(attr[0].sval,fp_export); 
+		     fputs(",",fp_export);
+	               sprintf(s, "%d",attr[1].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+               	     sprintf(s, "%d",attr[2].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[3].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[4].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[5].ival);
+	               fputs(s,fp_export); 
+		     fputs("\n",fp_export);
+      	         }
+}
+
+void ls()
+{
+	union Attribute attr[6];
+	int attr_blk=4;
+	struct HeadInfo h;
+	h=getheader(attr_blk);
+	unsigned char slotmap[h.numSlots];
+	getSlotmap(slotmap,attr_blk);          
+	for(int i=0;i<20;i++)
+      	{
+        	    getRecord(attr,attr_blk,i);
+	    if((char)slotmap[i]=='1')
+		cout<<attr[0].sval<<"\n";
+      	 }
+	 cout<<"\n";
+}
+
+void db(int bno,char *filename)
+{
+     FILE *fp_export=fopen(filename,"w");
+     struct HeadInfo h;
+     h=getheader(bno);
+     if(h.blockType==REC)
+     {
+		char s[16];
+     		sprintf(s, "%d",h.blockType );
+     		fputs(s,fp_export); 
+    		 fputs(",",fp_export);
+		sprintf(s, "%d",h.pblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.lblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.rblock );
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numEntries);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numAttrs);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		sprintf(s, "%d",h.numSlots);
+		fputs(s,fp_export); 
+		 fputs(",",fp_export);
+		
+		unsigned char slotmap[h.numSlots];
+		getSlotmap(slotmap,bno);
+		for(int k=0;k<h.numSlots;k++)
+		{
+		    char ch[2];
+		    ch[0]=slotmap[k];
+		    fputs(ch,fp_export); 
+		}
+	           union Attribute attr[h.numAttrs];
+	           for(int i=0;i<h.numEntries;i++)
+      		{
+        	    	     getRecord(attr,bno,i);
+		/*     if((char)slotmap[i]=='0')
+			strcpy(attr[0].sval,"NULL");
+		     fputs(attr[0].sval,fp_export); 
+		     fputs(",",fp_export);
+	               sprintf(s, "%d",attr[1].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+               	     sprintf(s, "%d",attr[2].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[3].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[4].ival);
+	               fputs(s,fp_export); 
+		     fputs(",",fp_export);
+		     sprintf(s, "%d",attr[5].ival);
+	               fputs(s,fp_export); 
+		     fputs("\n",fp_export);*/
+		}	
+      }
+}	
+
+void db()
+{
+          FILE *disk=fopen("disk","rb+");
+	fseek(disk,0,SEEK_SET);
+	unsigned char blockAllocationMap[4*BLOCK_SIZE];
+	fread(blockAllocationMap,4*BLOCK_SIZE,1,disk);
+	int iter;
+	fclose(disk);
+	char s[16];
+	FILE *fp_export=fopen("block_allocation_map","w");
+	for(iter=0;iter<4;iter++)
+	{
+		fputs("Block ",fp_export);
+		sprintf(s, "%d",iter);
+	          fputs(s,fp_export); 
+		fputs(": Block Allocation Map\n",fp_export);
+	}
+	for(iter=4;iter<4*BLOCK_SIZE;iter++)
+	{
+		fputs("Block ",fp_export);
+		sprintf(s, "%d",iter);
+	          fputs(s,fp_export); 
+		if((int32_t)(blockAllocationMap[iter])==UNUSED_BLK)
+		{
+			fputs(": Unused Block\n",fp_export);
+		}
+		if((int32_t)(blockAllocationMap[iter])==REC)
+		{
+			fputs(": Record Block\n",fp_export);
+		}
+		if((int32_t)(blockAllocationMap[iter])==IND_INTERNAL)
+		{
+			fputs(": Internal Index Block\n",fp_export);
+		}
+		if((int32_t)(blockAllocationMap[iter])==IND_LEAF)
+		{
+			fputs(": Leaf Index Block\n",fp_export);
+		}
+	}
+}
 
 int main()
 {
 createdisk();
 formatdisk();
 meta();
-//cout<<"Importing..\n";
-//import("rel1.csv");
-////cout<<"import done\n";
-union Attribute a[6];
-for(int i=0;i<20;i++)
-{getRecord(a,5,i);
-cout<<a[0].sval<<" "<<a[1].sval<<" "<<a[2].ival<<" "<<a[3].ival<<" "<<a[4].ival<<" "<<a[5].ival<<endl;
-}
-//cout<<"Exporting\n";
-exp("ATTRIBUTECAT","rel3");
-//getRecord(a,5,15);
-//cout<<"dddddd\n";
-//cout<<a[0].sval<<endl;
-
-//cout<<"Deleting...\n";
- //ba_delete("rel1");
-//cout<<"jjjj\n";
-//exp("rel1","rel2");
-
-
-
+import("rel1.csv");
+import("sample.csv");
+import("rel2.csv");
+ls();
+ba_renamerel("sample","rel3");
+ls();
+ba_renameattr("rel3","CGPA","SGPA");
+ba_delete("rel3");
+dump_attrcat();
+dump_relcat();
+ls();
+db();
+exp("rel1","rel_1");
+exp("rel2","rel_2");
+exp("rel3","rel_3");
+//int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char strval[ATTR_SIZE])
+//select("rel1","rel11","NAME",101,"ABC");
 }
 
 

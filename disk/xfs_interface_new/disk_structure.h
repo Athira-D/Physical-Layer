@@ -18,7 +18,12 @@ struct recBlock {
 };
 
 
-
+struct A
+{
+	long long int a;
+	char b[16];
+          float c;
+};
 	
 
 struct internalIndexBlock {

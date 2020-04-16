@@ -106,6 +106,7 @@ int getFreeRecBlock()
 
 recId getFreeSlot(int block_num)
 {
+	int arg_blk=block_num;
 	recId recid = {-1, -1};
 	int prev_block_num, next_block_num;
 	int num_slots;
@@ -156,6 +157,7 @@ recId getFreeSlot(int block_num)
 	header = getheader(block_num);
 	header.lblock = prev_block_num;
 	header.numSlots = num_slots;
+	header.rblock=-1;
 	//was not there before: Athira
 	header.numAttrs=num_attrs;
 	setheader(&header,block_num);
@@ -171,9 +173,11 @@ recId getFreeSlot(int block_num)
 	//setting prev_block_num rblock to new block
 	header=getheader(prev_block_num);
 	header.rblock = block_num;
-	setheader(&header,block_num);
+	setheader(&header,prev_block_num);
 	return recid;
 }
+
+
 
 int getRecord(union Attribute *rec,int blockNum,int slotNum)
 { 
@@ -372,6 +376,7 @@ int ba_insert(int relid, union Attribute *rec)
 	int num_attrs = relcat_entry[1].ival;
 	unsigned char slotmap[num_slots];
 	int blkno=first_block;
+
 	if(first_block==-1)
 	{        
 	          blkno=getFreeRecBlock();
@@ -391,6 +396,7 @@ int ba_insert(int relid, union Attribute *rec)
 	}
 	
 	recId recid = getFreeSlot(blkno);
+	
 	relcat_entry[4].ival=recid.block;
 	//cout<<"blk no: "<<relcat_entry[4].ival<<" ";
 	setRelCatEntry(relid, relcat_entry);
@@ -410,6 +416,7 @@ int ba_insert(int relid, union Attribute *rec)
 	//increasing number of entries in relation catalog entry
 	relcat_entry[2].ival = relcat_entry[2].ival + 1;
 	setRelCatEntry(relid, relcat_entry);
+	
 	return SUCCESS;
 }
 
