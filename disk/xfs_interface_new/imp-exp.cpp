@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "schema.cpp"
+#include "algebra.cpp"
 //#include "algebra.cpp"
 
 //TO DO
@@ -586,7 +587,30 @@ exp("rel1","rel_1");
 exp("rel2","rel_2");
 exp("rel3","rel_3");
 //int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char strval[ATTR_SIZE])
-//select("rel1","rel11","NAME",101,"ABC");
+openRel("rel1");
+select("rel1","rel11","CGPA",LE,"9.6");
+exp("rel11","rel_11");
+ls();
+char attrs[3][ATTR_SIZE];
+strcpy(attrs[0],"NO");
+strcpy(attrs[1],"PHNO");
+strcpy(attrs[2],"PLACE");
+openRel("rel11");
+project("rel11","rel12",3,attrs);
+ls();
+exp("rel12","rel_12");
+int id=getRelId("rel11");
+union Attribute b[6];
+getRelCatEntry(id,b);
+cout<<"first_blk is "<<b[3].ival<<endl;
+unsigned char slotmap[b[5].ival];
+getSlotmap(slotmap,8);
+for(int i=0;i<b[5].ival;i++)
+	cout<<slotmap[i];
+cout<<id<<endl;
+
+
+
 }
 
 
