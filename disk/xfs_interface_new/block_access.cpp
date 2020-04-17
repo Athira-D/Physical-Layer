@@ -1,11 +1,9 @@
-//ToDo : write getBlockType()
-//review getRecord
-//open rel table null is long int. replace with '\0'?
+//ToDo 
 //memset in getFreeslot 
 //why are we not setting pblock and rblock after getFreeRecBlock in getFreeSlot
-//in getRelcat do we need the & before relcat_entry or just relcat_entry
 //ToDo: After getFreeslot we should update block allocation map if new block is allocated...needed in ba_insert anyway.
 //Not sure about the order in compare () in linear search.should attrval be first argument?
+// NOt updating blocktype,no of entries,p block etc after a new block is obtained. when to do it?
 
 /*#include<stdlib.h>
 #include<stdio.h>
