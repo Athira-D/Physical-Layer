@@ -79,6 +79,31 @@ void setSlotmap(unsigned char * SlotMap,int no_of_slots,int blockNum)
 	fclose(disk);
 }
 
+int getFreeBlock(int block_type)
+{
+	
+	FILE *disk=fopen("disk","rb+");
+	fseek(disk,0,SEEK_SET);
+	unsigned char blockAllocationMap[4*BLOCK_SIZE];
+	fread(blockAllocationMap,4*BLOCK_SIZE,1,disk);
+	int iter;
+	for(iter=0;iter<4*BLOCK_SIZE;iter++)
+	{
+		if((int32_t)(blockAllocationMap[iter])==UNUSED_BLK)
+		{
+			//cout<<"in getfreerecblk: "<<"\n";
+			blockAllocationMap[iter]=(unsigned char)block_type;
+			fseek(disk,0,SEEK_SET);
+			fwrite(blockAllocationMap,2048*4,1,disk);
+			fclose(disk);
+			return iter;
+		}
+	}
+	
+	return FAILURE;
+
+}
+
 int getFreeRecBlock()
 {
 	
