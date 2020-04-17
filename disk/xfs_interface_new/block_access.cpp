@@ -485,32 +485,30 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 	//get the record corresponding to the relation name
 	union Attribute relcat_entry[6];
 	getRelCatEntry(relid,relcat_entry);
+	//cout<<"linear search relid is"<<relid<<endl;
+	//cout<<prev_recid->block<<prev_recid->slot<<endl;
 	/*cout<<relcat_entry[0].sval<<endl;
 	cout<<relcat_entry[1].ival<<endl;
 	cout<<relcat_entry[2].ival<<endl;
 	cout<<relcat_entry[3].ival<<endl;*/
+	int offset,attr_type;
 	
 	//get the record itself in relcat_entry array of attributes
 	int curr_block,curr_slot,next_block=-1;
 	int no_of_attributes=relcat_entry[1].ival;
 	int no_of_slots=relcat_entry[5].ival;
 	//cout<<"slots"<<no_of_slots<<endl;
-	union Attribute attrcat_entry[6];
-	getAttrCatEntry(relid,attrName,attrcat_entry);
-	/*cout<<"!!!!!"<<endl;
-	cout<<attrcat_entry[0].sval<<endl;
-	cout<<attrcat_entry[1].sval<<endl;
-	cout<<attrcat_entry[2].ival<<endl;
-	cout<<attrcat_entry[5].ival<<endl;
-	cout<<"!!!!"<<endl;*/
-
-	int offset= attrcat_entry[5].ival;
-	int attr_type=attrcat_entry[2].ival;
+	if(op!=PRJCT)
+	{	union Attribute attrcat_entry[6];
+		getAttrCatEntry(relid,attrName,attrcat_entry);
+		offset= attrcat_entry[5].ival;
+		attr_type=attrcat_entry[2].ival;
+	}
 	recId ret_recid;
 
 	if((prev_recid->block==-1)&& prev_recid->slot==-1)
 	{
-		//cout<<"yessss\n";
+		//cout<<"yessss"<<endl;
 		curr_block = relcat_entry[3].ival;
 		curr_slot = 0;
 		//cout<<curr_block<<curr_slot<<endl;
@@ -523,6 +521,7 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 		 curr_slot = prev_recid->slot+1;
 	}
 	unsigned char slotmap[no_of_slots];
+	//cout<<"In linear searchhh"<<curr_block;
 	while(curr_block!=-1)
 	{
 		int i=curr_slot;
@@ -532,20 +531,29 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 		getSlotmap(slotmap,curr_block);
 		for(;i<no_of_slots;i++)
 		{
+			//cout<<"iiiii"<<endl;
 			union Attribute record[no_of_attributes];
 			if(slotmap[i]=='0')
+			{
+				//cout<<"skippinggg"<<endl;
 				continue;
+			}	
 			//cout<<"before get record "<<curr_block<<" "<<i<<endl;
+			//cout<<"$"<<endl;
 			getRecord(record,curr_block,i);
+			bool cond=false;
 			/*if(retval==E_FREESLOT)
 			{
 				continue;
 			}*/
 			//cout<<"attr type"<<attr_type<<endl;
 			//cout<<"record[offset] "<<record[0].sval<<endl;
-			int flag=compare(attrval,record[offset],attr_type);
+			if(op!=PRJCT)
+			{
+				//cout<<"op"<<op<<endl;
+				int flag=compare(record[offset],attrval,attr_type);
 			//cout<<"flaag   "<<flag<<endl;
-			bool cond=false;
+			
 			switch(op)
 			{
 				case NE: 
@@ -572,9 +580,12 @@ recId linear_search(relId relid, char attrName[ATTR_SIZE], union Attribute attrv
 							if(flag >= 0)
 								cond=true;
 			}
-			if(cond==true)
+			}
+			
+			if(cond==true||op==PRJCT)
 			{
-				//record id of the record that satisfies the given condition	
+				//record id of the record that satisfies the given condition
+				//cout<<"hereeeeeeee"	<<curr_block<<i<<endl;
 				ret_recid = {curr_block, i}; 
 				//set the prev_recid 		
 				*prev_recid= ret_recid;
@@ -823,28 +834,38 @@ int ba_delete(char relName[ATTR_SIZE])
 }	 
 
 
-int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op)
+int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], union Attribute attrval, int op,recId * prev_recid)
 {
 	
 	/*get the attribute catalog entry from the attribute cache corresponding 
 	  to the relation with Id=relid and with attribute_name=attrName using
 	  OpenRelTable::getAttrCatEntry(relid, attrName, &attrcat_entry); of cache layer */
 	//get root_block from the attribute catalog entry (attrcat_entry)
-	union Attribute attrcat_entry[6];
-	getAttrCatEntry(relid,attrName,attrcat_entry);
-	int root_block=attrcat_entry[4].ival;
 	recId recid;
-	static recId prev_recid={-1,-1};
-	if(root_block == -1)
-	{ 	//if Index does not exist for the attribute
-		//search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval  
-		recid = linear_search(relid, attrName, attrval, op,&prev_recid);
+	if(op==PRJCT)
+	{
+		//cout<<"hereee in ba search"<<endl;
+		recid = linear_search(relid, attrName, attrval, op,prev_recid);
+
 	}
 	else
-	{ //if Index exists for the attribute
-	  //search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval
-		//recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
+	{
+		union Attribute attrcat_entry[6];
+		getAttrCatEntry(relid,attrName,attrcat_entry);
+		int root_block=attrcat_entry[4].ival;
+	
+		if(root_block == -1)
+		{ 	//if Index does not exist for the attribute
+			//search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval  
+			recid = linear_search(relid, attrName, attrval, op,prev_recid);
+		}
+		else
+		{ 	//if Index exists for the attribute
+	  		//search for the record id (recid) correspoding to the attribute with attribute name attrName and with value attrval
+			//recid = bplus_search(relid, attrName, attrval, op,&prev_recid);
+		}
 	}
+	
 	
 	if((recid.block==-1) && (recid.slot==-1))
 	{ //if it fails to find a record satisfying the given condition
@@ -853,6 +874,7 @@ int ba_search(relId relid, union Attribute *record, char attrName[ATTR_SIZE], un
 	
 	 //recid.block is the block that contains record
 	getRecord(record, recid.block,recid.slot); //recid.slot is the slot that contains record
+	//cout<<"successful ba search"<<endl;
 	return SUCCESS;
 }
 

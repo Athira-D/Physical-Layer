@@ -16,7 +16,8 @@ int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[
     union Attribute attrval;union Attribute relcat_rec[6];
     strcpy(attrval.sval,relname);
     union Attribute relcatrec[6];//relname,#attrs,#records,firstblk,slotsperblk
-    int flag=ba_search(0,relcatrec,"RelName", attrval, EQ);
+    recId prev_recid={-1,-1};
+    int flag=ba_search(0,relcatrec,"RelName", attrval, EQ,&prev_recid);
     //cout<<"Flag: "<<flag<<"\n";
     if(flag==SUCCESS)
    {
