@@ -16,6 +16,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     int src_relid=getRelId(srcrel);
     if(src_relid==FAILURE)
         return E_RELNOTOPEN;
+    //cout<<"Relopen"<<endl;
     union Attribute attrcat_entry[6];
 
     // get the attribute catalog entry for attr, using getAttrcatEntry() method of cache layer(let it be attrcatentry).
@@ -24,11 +25,12 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     if(flag!=SUCCESS)
         return flag;
     
-
+    //cout<<"Getattrcat successful"<<endl;
     //convert strval into union Attribute (let it be val) as shown in the following code:
      //if convert fails, return E_ATTRTYPEMISMATCH
-    int type=attrcat_entry[1].ival;
+    int type=attrcat_entry[2].ival;
     union Attribute val;
+    //cout<<type<<endl;
     if(type==INT) 
         //The input contains a string representation of the integer attribute value.
         val.ival=stoi(strval);
@@ -46,7 +48,7 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     }
     else
         return E_NATTRMISMATCH;
-   
+   //cout<<"Here!!"<<endl;
 
     //Next task is to create the destination relation.
     //Prepare arguments for createRel() in the following way:
@@ -122,13 +124,16 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
         else: break
     */
 
+    prev_recid={-1,-1};
     while(1)
     {
+
         union Attribute record[nAttrs];
-        retval=ba_search(src_relid,record,attr,val,op);
+        retval=ba_search(src_relid,record,attr,val,op,&prev_recid);
         if(retval==SUCCESS)
         {
             int ret= ba_insert(target_relid,record);
+            //cout<<"yaaay"<<endl;
             if(ret!=SUCCESS)
             {
                 closeRel(target_relid);
@@ -145,18 +150,22 @@ int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE
     // return SUCCESS;
 
     closeRel(target_relid);
+    //cout<<"reached here"<<endl;
     return SUCCESS;
     
     }
 
 
 
-int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, char tar_attrs[][ATTR_SIZE], char attr[ATTR_SIZE], int op, char val[ATTR_SIZE])
+int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, char tar_attrs[][ATTR_SIZE])
 {
+    //cout<<"reached project"<<endl;
     int srcrelid,targetrelid;
     int flag,iter;
 
     srcrelid=getRelId(srcrel);
+    //cout<<"****************************************"<<endl;
+    //cout<<"project relid is"<<srcrelid<<endl;
     if(srcrelid==E_NOTOPEN)
     {
         return E_NOTOPEN; // src relation not opened
@@ -193,13 +202,21 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
         flag=ba_delete(targetrel);
         return E_CACHEFULL;
     }
+    //cout<<"projecttttt"<<endl;
+    recId prev_recid={-1,-1};
 
     while(1)
     {
         union Attribute rec[nAttrs];
-        flag=ba_search(srcrelid,rec,attr,val,op);
-        if(flag=SUCCESS)
+        union Attribute val;
+        strcpy(val.sval,"PRJCT");
+        char attr[ATTR_SIZE];
+        strcpy(attr,"PRJCT");
+        //cout<<"ba search of project"<<endl;
+        flag=ba_search(srcrelid,rec,attr,val,PRJCT,&prev_recid);
+        if(flag==SUCCESS)
         {
+            //cout<<"hereeeee"<<endl;
             union Attribute proj_rec[tar_nAttrs];
 
             for(iter=0;iter<tar_nAttrs;iter++){
@@ -208,7 +225,7 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
             flag=ba_insert(targetrelid,proj_rec);
             if(flag!=SUCCESS)
             {
-                closeRel(targetrel);
+                closeRel(targetrelid);
                 ba_delete(targetrel);
                 return flag; //unable to insert into target relation.
             }
@@ -217,6 +234,6 @@ int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, cha
             break;
         
     }
-    closeRel(targetrel);
+    closeRel(targetrelid);
     return SUCCESS;
 }
