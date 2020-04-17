@@ -22,6 +22,7 @@
 #define GT 105
 #define NE 106 //if considered
 #define RST 100 //reset op.
+#define PRJCT 107
 
 #define INT 0
 #define STRING 1
