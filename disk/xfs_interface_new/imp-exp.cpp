@@ -571,7 +571,7 @@ int main()
 createdisk();
 formatdisk();
 meta();
-import("rel1.csv");
+/*import("rel1.csv");
 import("sample.csv");
 import("rel2.csv");
 ls();
@@ -607,7 +607,18 @@ unsigned char slotmap[b[5].ival];
 getSlotmap(slotmap,8);
 for(int i=0;i<b[5].ival;i++)
 	cout<<slotmap[i];
-cout<<id<<endl;
+cout<<id<<endl;*/
+import("join1.csv");
+import("join2.csv");
+ls();
+openRel("join1");
+openRel("join2");
+int flag=join("join1","join2","join3","ID","ID");
+cout<<flag<<endl;
+ls();
+exp("join3","rel_join3");
+
+
 
 
 

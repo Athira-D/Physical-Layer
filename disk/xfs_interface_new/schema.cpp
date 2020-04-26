@@ -110,7 +110,7 @@ int closeRel(int relid)    //return 0 on success
     }
     if(strcmp(OpenRelTable[relid],"NULL")==0)
     {
-        return E_NOTOPEN;
+        return E_RELNOTOPEN;
     }   
     strcpy(OpenRelTable[relid],"NULL");
     return 0;
@@ -121,6 +121,67 @@ int getRelId(char relname[16])
   for(int i=0;i<12;i++)
     if(strcmp(OpenRelTable[i],relname)==0)
       return i;
-    return E_NOTOPEN;
+    return E_RELNOTOPEN;
 }
 
+int deleteRel(char relname[ATTR_SIZE])
+{
+    // get the relation's open relation id(let it be srelid), using getRelId() method of Openreltable
+    // if relation is opened in open relation table, return E_RELOPEN
+  int relid=getRelId(relname);
+  if(relid!=E_RELNOTOPEN)
+    return E_RELOPEN;
+
+  int retval  = ba_delete(relname);
+  return retval;
+}
+
+int renameRel(char Oldrelname[ATTR_SIZE],char Newrelname[ATTR_SIZE])
+{
+    // get the relation's open relation id(let it be srelid), using getRelId() method of Openreltable
+    // if relation is opened in open relation table, return E_RELOPEN
+  int relid=getRelId(Oldrelname);
+  if(relid!=E_RELNOTOPEN)
+    return E_RELOPEN;
+
+  int retval= ba_renamerel(Oldrelname,Newrelname);
+  return retval;
+}
+
+int renameAttr(char relname[ATTR_SIZE], char OldAttrName[ATTR_SIZE], char NewAttrName[ATTR_SIZE])
+{
+    // get the relation's open relation id(let it be srelid), using getRelId() method of Openreltable
+    // if relation is opened in open relation table, return E_RELOPEN
+  int relid=getRelId(relname);
+  if(relid!=E_RELNOTOPEN)
+    return E_RELOPEN;
+    
+  int retval= ba_renameattr(relname,OldAttrName,NewAttrName);
+  return retval;
+}
+
+/*int createIndex(char relname[ATTR_SIZE],char attr[ATTR_SIZE])
+{
+    // get the src relation's open relation id, using getRelId() method of Openreltable.
+    // if source not opened in open relation table, return E_RELNOTOPEN
+  int relid=getRelId(relname);
+  if(relid==E_RELNOTOPEN)
+    return relid;
+    
+
+  int retval=bplus_create(relid,attr);
+  return retval;
+}
+
+int dropIndex(char relname[ATTR_SIZE],char attr[ATTR_SIZE]){
+    // get the src relation's open relation id, using getRelId() method of Openreltable.
+    // if source opened in open relation table, return E_RELOPEN
+
+  int relid=getRelId(relname);
+  if(relid!=E_RELNOTOPEN)
+    return E_RELOPEN;
+    
+
+  int retval=bplus_destroy(relid,attr);
+  return retval;
+}*/
