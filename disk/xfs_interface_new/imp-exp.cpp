@@ -607,7 +607,7 @@ unsigned char slotmap[b[5].ival];
 getSlotmap(slotmap,8);
 for(int i=0;i<b[5].ival;i++)
 	cout<<slotmap[i];
-cout<<id<<endl;*/
+cout<<id<<endl;
 import("join1.csv");
 import("join2.csv");
 ls();
@@ -618,8 +618,12 @@ cout<<flag<<endl;
 ls();
 exp("join3","rel_join3");
 
+*/
+import("sample.csv");
 
-
+int relid=openRel("sample");
+bplus_create(relid,"MARK");
+dropindex(relid,"MARK");
 
 
 }
