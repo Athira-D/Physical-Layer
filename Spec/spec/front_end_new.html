@@ -1,0 +1,179 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Front End Interface Specification</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../fontawesome/css/solid.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <!--FAVICON-->
+    <link rel="shortcut icon" type="image/png" href="/img/favicon.png" />
+    
+    <script type="text/javascript" src="../js/jquery-3.4.0.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../js/bootstrap.min.js" charset="utf-8"></script>
+</head>
+    
+    
+<body>
+    
+    <!-- HEADER BEGIN -->
+    <header id="header">
+        <nav class="navbar navbar-expand-sm fixed-top bg-dark navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="/index.html">
+                    <h3><span style="color:DodgerBlue">NITC</span>base</h3>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse " id="collapsibleNavbar">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/documentation.html">Documentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/roadmap.html">Roadmap</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about.html">About Us</a>
+                    </li>
+                </ul>
+                </div>  
+            </div>
+        </nav>
+    </header>
+    <!-- END OF HEADER -->
+    
+    <!-- CONTENT BEGIN -->
+    <div id="content">
+        <div class="container-fluid">
+            <div class="row">
+                
+                <!-- SIDEBAR BEGIN -->
+                <div class="col-sm-2">
+                    <nav class="navbar navbar-expand-sm sticky-top sticky-offset">
+                        <button class="navbar-toggler sticky-top sticky-offset" type="button" data-toggle="collapse" data-target="#collapsibleSidebar">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <div class="collapse navbar-collapse" id="collapsibleSidebar">
+                        <ul class="nav flex-column sidemenu">
+                            <li> <a class="sec" href="#ddl_commands">DDL commands</a></li>
+                            <ul>
+                                <li> <a href="#create_table">CREATE TABLE</a></li>
+                                <li> <a href="#drop_table">DROP TABLE</a></li>
+                                <li> <a href="#open_table">OPEN TABLE</a></li>
+                                <li> <a href="#close_table">CLOSE TABLE</a></li>
+                                <li> <a href="#create_index">CREATE INDEX</a></li>
+                                <li> <a href="#drop_index">DROP INDEX</a></li>
+                                <li> <a href="#rename_table">ALTER TABLE RENAME</a></li>
+                                <li> <a href="#rename_column">ALTER TABLE RENAME COLUMN</a></li>
+                            </ul>
+                            <li> <a class="sec" href="#dml_commands">DML commands</a></li>
+                            <ul>
+                                <li> <a href="#insert_single">INSERT INTO TABLE VALUES </a></li>
+                                <li> <a href="#create_table">INSERT INTO TABLE FROM FILE</a></li>
+                                <li> <a href="#create_table">SELECT FROM TABLE</a></li>
+                                <li> <a href="#create_table">SELECT FROM TABLE WHERE</a></li>
+                                <li> <a href="#create_table">SELECT FROM JOIN WHERE</a></li>
+
+                            </ul>   
+
+                            
+                        </ul>
+                        </div>
+                    </nav>
+                </div>
+                <!-- END OF SIDEBAR -->
+                
+                <!--MAIN CONTENT START-->
+                <div class="col-sm-10">
+                    <div id="top">
+                        <!-- PAGE STARTS -->
+                        <div class="pagetitle">
+                            <h1>Front End Interface Specification</h1>
+                        </div>
+                        <p>
+                            NITCBase provides a command-line Front End Interface, that allows the students to input queries amd execute them.There are two types of commands that can be given as input to the front end interface:
+                        </p>
+                        <ol>
+                            <li> Data Definition Language Commands</li>
+                            <li>Data Manipulation Language Commands</li>
+                        </ol>
+
+                        <div id="ddl_commands">
+                            <h2>DDL Commands</h2>
+                            <p> The Data Definition Language commands are used to define the database schema. They are used to create and modify the structure of relations in the database. The following are the DDL commands that can be queried into NITCbase :
+                            </p> 
+                        </div>
+                         <div id="create_table" class="detail">
+                            <h4>CREATE TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> CREATE TABLE <i> tablename</i>(<i>attr1_name attr1_type attr2_name</i>,<i>attr2_name attr2_type</i>....);</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of the relation</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation of the same name already exists</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_DUPLICATEATTR</td>
+                                    <td>If two or more attributes have the same name</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If there is no sufficient disk space to create the relation</td>
+                                                    
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to create a relation of the given name, with given attribute names and types.The type of an attribute can be INT, STR or FLOAT.</p>
+                            <h5>Note:</h5>
+                            <p>In NITCBase, the maximum size of an attribute is 16 bytes. Since relation names and attribute names are attributes themselves in the catalog structures, the table name and attribute names in the queries must only have a maximum of 15 characters. If the length is greater than 16, only the first 15 characters will be taken.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">CREATE TABLE sample (Rollno INT,Name STR,CGPA FLOAT);</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+
+
+
+
+
+
+
+
+                       
+                        <!-- PAGE ENDS -->
+                    </div>
+                </div>
+                <!-- END OF MAIN CONTENT -->
+            </div>
+        </div>
+        
+    </div>
+    <!-- END OF CONTENT -->
+</body>
+
+</html>
