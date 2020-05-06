@@ -16,3 +16,4 @@
 #define E_DUPLICATEATTR -15
 #define E_RELOPEN -16
 #define E_ATTRTYPEMISMATCH -17
+#define E_INVALID -18
