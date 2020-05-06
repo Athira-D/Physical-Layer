@@ -131,6 +131,8 @@ int deleteRel(char relname[ATTR_SIZE])
   int relid=getRelId(relname);
   if(relid!=E_RELNOTOPEN)
     return E_RELOPEN;
+  if(strcmp(relname,"RELATIONCAT")==0||strcmp(relname,"ATTRIBUTECAT")==0)
+    return E_INVALID;
 
   int retval  = ba_delete(relname);
   return retval;
