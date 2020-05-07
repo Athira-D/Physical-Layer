@@ -68,7 +68,6 @@
                                 <li> <a href="#create_table">CREATE TABLE</a></li>
                                 <li> <a href="#drop_table">DROP TABLE</a></li>
                                 <li> <a href="#open_table">OPEN TABLE</a></li>
-                                <li> <a href="#close_table">CLOSE TABLE</a></li>
                                 <li> <a href="#create_index">CREATE INDEX</a></li>
                                 <li> <a href="#drop_index">DROP INDEX</a></li>
                                 <li> <a href="#rename_table">ALTER TABLE RENAME</a></li>
@@ -77,10 +76,14 @@
                             <li> <a class="sec" href="#dml_commands">DML commands</a></li>
                             <ul>
                                 <li> <a href="#insert_single">INSERT INTO TABLE VALUES </a></li>
-                                <li> <a href="#create_table">INSERT INTO TABLE FROM FILE</a></li>
-                                <li> <a href="#create_table">SELECT FROM TABLE</a></li>
-                                <li> <a href="#create_table">SELECT FROM TABLE WHERE</a></li>
-                                <li> <a href="#create_table">SELECT FROM JOIN WHERE</a></li>
+                                <li> <a href="#insert_from_file">INSERT INTO TABLE FROM FILE</a></li>
+                                <li> <a href="#select*">SELECT * FROM TABLE</a></li>
+                                <li> <a href="#select_attr">SELECT <i>Attrlist</i> FROM TABLE</a></li>
+                                <li> <a href="#select_*where">SELECT * FROM TABLE WHERE</a></li>
+                                <li> <a href="#select_attr_where">SELECT <i>Attrlist</i> FROM TABLE WHERE</a></li>
+                                <li> <a href="#select_*join">SELECT * FROM JOIN WHERE</a></li>
+                                <li> <a href="#select_attr_join">SELECT <i>Attrlist</i> FROM JOIN WHERE</a></li>
+
 
                             </ul>   
 
@@ -110,7 +113,6 @@
                             <h2>DDL Commands</h2>
                             <p> The Data Definition Language commands are used to define the database schema. They are used to create and modify the structure of relations in the database. The following are the DDL commands that can be queried into NITCbase :
                             </p> 
-                        </div>
                          <div id="create_table" class="detail">
                             <h4>CREATE TABLE</h4>
                             <h5>Syntax :</h5>
@@ -156,6 +158,807 @@
                                </div>
                              </div>
                          </div>
+                          <div id="drop_table" class="detail">
+                            <h4>DROP TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> DROP TABLE <i> tablename</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful deletion of the relation</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELOPEN</td>
+                                    <td>If the relation is open </td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTEXIST</td>
+                                    <td>If the relation of the given name does not exist</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the relation name is "RELATIONCAT" or "ATTRIBUTECAT"</td>
+                                                    
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to delete the relation of the given name. It deletes all the record and index blocks corresponding to the relations, and also delete the entries corresponding to the relation in the relation catelog and attribute catalog.The entries corresponding to the deleted blocks in the block allocation map are also reset.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">DROP TABLE sample ;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="open_table" class="detail">
+                            <h4>OPEN TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> OPEN TABLE <i> tablename</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>relId</td>
+                                    <td>Returns the relId on succesful opening of the relation</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTEXIST</td>
+                                    <td>If the relation with name relName does not exist in the disk</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If there are no free slots in the Open Relation table</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to open the relation specified in cache/OpenRelTable.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">OPEN TABLE sample;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="close_table" class="detail">
+                            <h4>CLOSE TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> CLOSE TABLE <i> tablename</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>Returns the relId on succesful opening of the relation</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_NOTOPEN</td>
+                                    <td>If relation with the given name is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the relation name is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to close either of the catalogs</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to close the relation specified, in cache/OpenRelTable.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">CLOSE TABLE sample;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="create_index" class="detail">
+                            <h4>CREATE INDEX</h4>
+                            <h5>Syntax :</h5>
+                            <p> CREATE INDEX ON <i> tablename</i>.<i>attributename</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of B+ tree</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If the given attribute does not exist</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If there is not enough space in the disk to create the tree</td>
+                                                    
+                                </tr>
+                                 <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the relation name is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to create an index for catalogs</td>
+                                                    
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to create an index on a given attribute of a relation.Before executing this query,the relation must be opened first using the OPEN TABLE query.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">CREATE INDEX ON sample.Rollno ;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="drop_index" class="detail">
+                            <h4>DROP INDEX</h4>
+                            <h5>Syntax :</h5>
+                            <p> DROP INDEX ON <i> tablename</i>.<i>attributename</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful deletion of B+ tree</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If the given attribute does not exist</td>
+                                                    
+                                </tr>
+                                
+                                 <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the relation name is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to create an index for catalogs</td>
+                                                    
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to drop/delete the B+ tree indexing on the given attribute of the given relation.Before executing this query,the relation must be opened first using the OPEN TABLE query.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">DROP INDEX ON sample.Rollno ;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="rename_table" class="detail">
+                            <h4>ALTER TABLE RENAME</h4>
+                            <h5>Syntax :</h5>
+                            <p> ALTER TABLE RENAME<i> tablename</i> TO <i>new_tablename</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful renaming of the relation</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELOPEN</td>
+                                    <td>If the relation is open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTEXIST</td>
+                                    <td>If the relation that is to be renamed does not exist</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If another relation already exists with the name <i>new_tablename</i></td>
+                                                    
+                                </tr>
+                                
+                                 <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the relation name is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to rename the catalogs</td>
+                                                    
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to rename an existing relation to a given new name.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">ALTER TABLE RENAME sample TO Students;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="rename_column" class="detail">
+                            <h4>ALTER TABLE RENAME COLUMN</h4>
+                            <h5>Syntax :</h5>
+                            <p> ALTER TABLE RENAME<i> tablename</i> COLUMN <i>column_name</i> TO <i>new_column_name</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful renaming of the attribute</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELOPEN</td>
+                                    <td>If the relation is open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTEXIST</td>
+                                    <td>If the relation with name <i>tablename</i> does not exist</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If the attribute with name <i>column_name</i> does not exist</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_ATTREXIST</td>
+                                    <td>If the attribute with name <i>new_column_name</i> already exists</td>
+                                                    
+                                </tr>
+                                
+                                 <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the relation name is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to rename the attributes of the catalogs</td>
+                                                    
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to rename an attribute of an existing relation.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">ALTER TABLE RENAME sample COLUMN CGPA TO SGPA;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                     </div>
+
+                    <div id="dml_commands">
+                        <h2>DML Commands</h2>
+                        <p> The Data Manipulation Language commands are used to manipulate the data stored in the relations of the database. The following are the DML commands that can be queried into NITCbase :
+                        </p> 
+                        <div id="insert_single" class="detail">
+                            <h4>INSERT INTO TABLE VALUES</h4>
+                            <h5>Syntax :</h5>
+                            <p> INSERT INTO TABLE<i> tablename</i> VALUES ( <i>value1</i>,<i>value2</i>,<i>value3</i>,... );</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful insertion of the record</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_NATTRMISMATCH</td>
+                                    <td>If the actual number of attributes in the relation is different from the provided number of attributes</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRTYPEMISMATCH</td>
+                                    <td>If the actual type of the attribute in the relation is different from the type of provided attribute in the record.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for inserting the record / index</td>
+                                                    
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to insert a single record into the given relation. The attribute values of the record are to be given as comma separated values. The order of the values must be the same as the order of attributes of the relation. For example, if a relation Students was created </p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <p style="margin: 0; line-height: 125%">
+                                                	<p> Given below are the records of the relation <i>Students</i>.</p>
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Name</td>
+                                                			<td>CGPA</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>Anu</td>
+                                                			<td>9.01</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>4</td>
+                                                			<td>Cody</td>
+                                                			<td>7</td>
+                                                		</tr>
+                                                	</table>
+                                                </p>
+                                                <p style="margin: 0; line-height: 125%">Suppose that the re<p> The query will look as follows:<br>
+ 
+ 												INSERT INTO Students VALUES FROM students.csv;
+												</p>
+                                                <p>The relation <i>Students</i> now looks like:
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Name</td>
+                                                			<td>CGPA</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>Anu</td>
+                                                			<td>9.01</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>4</td>
+                                                			<td>Cody</td>
+                                                			<td>7</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>Amy</td>
+                                                			<td>9.5</td>
+                                                		</tr>
+                                                	</table>
+                                                </p>
+                                                
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="insert_from_file" class="detail">
+                            <h4>INSERT INTO TABLE FROM FILE</h4>
+                            <h5>Syntax :</h5>
+                            <p>INSERT INTO TABLE <i>tablename</i> VALUES FROM <i>filepath</i>;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful insertion of all records in the file</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_FILEFORMATERROR</td>
+                                    <td>If the CSV file is not in the correct format</td>
+                                                    
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to insert multiple records into the relation from a csv file containing the values for the corresponding attributes. The order of values in the csv file must be the same as the attributes of the relation. Each line in the csv file corresponds to a record to be inserted in to the relation.
+							</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <p style="margin: 0; line-height: 125%">Here is an example of how a csv file containing records for insertion looks like:<br><br>
+                                            	<i>students.csv</i><br><br>
+                                            	<p style="margin: 0; line-height: 125%"> 3,Sunny,8</p>
+                                            	<p style="margin: 0; line-height: 125%"> 5,Sania,6 </p>
+                                            	<p style="margin: 0; line-height: 125%"> 7,Ralph,7.5</p>
+                                            	<br>
+                                                </p>
+                                            	<p> The query to insert all records from <i>students.csv</i> into the relation <i>Students</i> is :<br>
+                                            	INSERT INTO Students VALUES FROM students.csv;
+                                            	</p>		    
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+
+                         <div id="select*" class="detail">
+                            <h4>SELECT * FROM TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> SELECT * FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of new relation.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the source relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation with name targetrel already exists</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If the openRel() fails because of no free slots in open relation table</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for creating the new relation</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the target relation is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to select records into any of the catalogs</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command creates a new target relation with the same attributes as that of source relation,and inserts into it all records from the source relation</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">SELECT * FROM Students INTO Target_Students;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="select_attr" class="detail">
+                            <h4>SELECT<i> Attrlist</i>FROM TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> SELECT <i>Attribute1,Attribute2,....</i>FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of new relation.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the source relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation with name targetrel already exists</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If any of the attributes in <i>Attrlist</i> does not exist</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If the openRel() fails because of no free slots in open relation table</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for creating the new relation</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the target relation is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to select records into any of the catalogs</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command creates a new target relation with the attributes specified in <i>Attrlist</i>,and inserts all records(only the values corresponding to the specified attributes) of the source relation, into the newly created target relation.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">SELECT Name,CGPA FROM Students INTO Target_Students;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="select_*where" class="detail">
+                            <h4>SELECT * FROM TABLE WHERE</h4>
+                            <h5>Syntax :</h5>
+                            <p> SELECT * FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> WHERE <i>attrname OP value</i>;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of new relation.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the source relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation with name targetrel already exists</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If the attribute given by <i>attrname</i>does not exist</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRTYPEMISMATCH</td>
+                                    <td>If the actual type of the attribute in the relation is different from the type of provided attribute</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If the openRel() fails because of no free slots in open relation table</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for creating the new relation</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the target relation is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to select records into any of the catalogs</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command is used to retrieve all records of a given source relation, and insert them into a target relation, based on the the given condition. All records in the source relation that satisfy the condition, will be inserted into the newly created target relation.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">SELECT * FROM Students INTO Target_Students WHERE CGPA > 8;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                             <h5>Note:</h5>
+                             <p>Here, <i>OP</i> can only take a value from the set {=,>,<.>=,<=,!=}.</p>
+                         </div>
+                          <div id="select_attr_where" class="detail">
+                            <h4>SELECT<i> Attrlist</i>FROM TABLE</h4>
+                            <h5>Syntax :</h5>
+                            <p> SELECT <i>Attribute1,Attribute2,....</i>FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                               <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of new relation.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the source relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation with name targetrel already exists</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If any of the attributes in <i>Attrlist</i> does not exist</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRTYPEMISMATCH</td>
+                                    <td>If the actual type of the attribute in the relation is different from the type of provided attribute</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If the openRel() fails because of no free slots in open relation table</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for creating the new relation</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_INVALID</td>
+                                    <td>If the target relation is either "RELATIONCAT" or "ATTRIBUTECAT". i.e, when the user tries to select records into any of the catalogs</td>                   
+                                </tr>
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command creates a new target relation with the attributes specified in <i>Attrlist</i> ,and inserts those records(only the values corresponding to the attributes specified in the <i>Attrlist</i>) from the source relation which satisfy the given condition.</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">SELECT Name,CGPA FROM Students INTO Target_Students WHERE CGPA>8;</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="select_*join" class="detail">
+                            <h4>SELECT * FROM JOIN WHERE</h4>
+                            <h5>Syntax :</h5>
+                            <p> SELECT * FROM <i>source_relation1</i> JOIN <i>source_relation2</i> INTO <i>target_relation</i> WHERE <i>attribute1</i>=<i> attribute2</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                               <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of new relation.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the source relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation with name <i>target_relation</i> already exists</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If <i>attribute1</i> or <i>attribute2</i>does not exist</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRTYPEMISMATCH</td>
+                                    <td>If the actual type of any of the attributes in the source relations is different from the type of provided attribute.</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If the openRel() fails because of no free slots in open relation table</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for creating the new relation</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command creates a new target relation with attributes constituting from both the source relations(excluding specified attribute from 2nd src relation).It inserts the records obtained by equi-join of both the source relations(an attribute from each relation specified in arguments are used for equi-join) into the target relation.
+							</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">Example to be given</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         <div id="select_attr_join" class="detail">
+                            <h4>SELECT <i>Attrlist</i> FROM JOIN WHERE</h4>
+                            <h5>Syntax :</h5>
+                            <p> SELECT<i> Attribut1,Attribute2,..</i> FROM <i>source_relation1</i> JOIN <i>source_relation2</i> INTO <i>target_relation</i> WHERE <i>attribute1</i>=<i> attribute2</i> ;</p>
+                            <h5>Return value:</h5>
+                            <table class="table table-bordered table-hover">
+                              <tr>
+                                    <td>SUCCESS</td>
+                                    <td>On successful creation of new relation.</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELNOTOPEN</td>
+                                    <td>If the source relation is not open</td>
+                                                    
+                                </tr>
+                                <tr>
+                                    <td>E_RELEXIST</td>
+                                    <td>If a relation with name <i>target_relation</i> already exists</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRNOTEXIST</td>
+                                    <td>If <i>attribute1</i> or <i>attribute2</i>does not exist</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_ATTRTYPEMISMATCH</td>
+                                    <td>If the actual type of any of the attributes in the source relations is different from the type of provided attribute.</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_CACHEFULL</td>
+                                    <td>If the openRel() fails because of no free slots in open relation table</td>                   
+                                </tr>
+                                <tr>
+                                    <td>E_DISKFULL</td>
+                                    <td>If disk space is not sufficient for creating the new relation</td>                   
+                                </tr>
+                                
+                               
+                            </table>
+                            <h5> Description:</h5>
+                            <p>This command creates a new target relation with attributes given in <i>Attrlist</i>.It inserts the records(only the values of the specified attributes in <i>Attrlist</i> obtained by equi-join of both the source relations(an attribute from each relation specified in arguments are used for equi-join) into the target relation.
+							</p>
+                            <h5> Example:</h5>
+                            <div class="algo">
+                                <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <pre style="margin: 0; line-height: 125%">Example to be given</pre>
+                                            </td>
+                                        </tr>
+                                    </table>
+                               </div>
+                             </div>
+                         </div>
+                         
+                         
+                         
 
 
 
@@ -164,6 +967,8 @@
 
 
 
+
+                     </div>
                        
                         <!-- PAGE ENDS -->
                     </div>
