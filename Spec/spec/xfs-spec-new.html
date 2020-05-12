@@ -114,7 +114,7 @@
                         </div>
                         <p>
 		       
-XFS Interface is a command line external interface to access the NITCBase filesystem from the host (UNIX) system. The filesystem is simulated on a text file called disk.txt. This interface aims to provide the functionality of transferring relations from/to the host system to/from the disk and can be helpful in debugging the system during implementation. .There are three types of commands that can be given as input to the XFS interface:
+XFS Interface is a command line external interface to access the NITCBase filesystem from the host (UNIX) system. The filesystem is simulated on a binary file. This interface aims to provide the functionality of transferring relations from/to the host system to/from the disk and can be helpful in debugging the system during implementation. .There are three types of commands that can be given as input to the XFS interface:
                         </p>
                         <ol>
 		        <li> External File System Commands</li>
@@ -132,18 +132,18 @@ XFS Interface is a command line external interface to access the NITCBase filesy
                             <p>fdisk</p>
                            
                             <h5> Description:</h5>
-                            <p>It is used to create the disk (”disk.txt”) or to format the disk if already created. On a newly created/formatted disk default entries for the Block allocation map, Relation Catalog and Attribute Catalog are initialized according to the specification for the physical layer of the NITCBase. </p>
+                            <p>It is used to create the disk (”disk.txt”) or to format the disk if already created. On a newly created/formatted disk default entries for the Block allocation map, Relation Catalog and Attribute Catalog are initialized according to the specification for the physical layer of NITCBase. </p>
                         
                          </div>
                           <div id="import_relation" class="detail">
                             <h4>Import Relation</h4>
                             <h5>Syntax :</h5>
-                            <p>  import  <i>unix_filename</i> </p>
+                            <p>  import  <i>filepath</i> </p>
                           
                             <h5> Description:</h5>
-                            <p>The command import is used to load relations from the UNIX filesystem to the XFS disk.The argument <filename> specifies the name of the file which contains the contents of the relation to be uploaded. The command checks the size of the relation in the csv file, allocates the required number of blocks for the relation, updates the Block allocation map, Relation catalog and Attribute catalog.</p>
+                            <p>The command import is used to load relations from the UNIX filesystem to the XFS disk.The argument <i>filepath</i> specifies the path of the file which contains the contents of the relation to be uploaded. The command checks the size of the relation in the csv file, allocates the required number of blocks for the relation, updates the Block allocation map, Relation catalog and Attribute catalog.</p>
 		       <h5>File Format:</h5>
-                            <p>The contents of the relation must be in a file and must follow CSV (comma separated values) format.The first line of the CSV file must contain the names of the attributes of the relation. The data types of the attributes in the first line are inferred from the values of the corresponding attributes on the second line of the CSV file.Name of the relation that will be used to identify the relation in the catalogs will be the name of the CSV file.
+                            <p>The contents of the relation must be in a file and must follow CSV (comma separated values) format.The first line of the CSV file must contain the names of the attributes of the relation. The data types of the attributes in the first line are inferred from the values of the corresponding attributes on the second line of the CSV file. Name of the relation that will be used to identify the relation in the catalogs will be the name of the CSV file.
 </p>
                            <h5> Example:</h5>
                             <div class="algo">
@@ -169,10 +169,10 @@ The datatypes of the attributes are determined from the values of the attributes
                          <div id="export_relation" class="detail">
                             <h4>Export Relation</h4>
                             <h5>Syntax :</h5>
-                            <p> export <i> tablename</i> <i> unix_filename </i></p>
+                            <p> export <i> tablename</i> <i> pathname </i></p>
                            
                             <h5> Description:</h5>
-                            <p>This command is used to export a relation from XFS disk to UNIX file system.The contents of the relation are written to the specified file in the CSV format specified above.</p>
+                            <p>This command is used to export a relation from XFS disk to UNIX file system.The contents of the relation are written to the specified location as per the argument <i>pathname</i> in the CSV format specified above.</p>
                             <h5> Example:</h5>
                             <div class="algo">
                                 <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
@@ -503,7 +503,7 @@ The datatypes of the attributes are determined from the values of the attributes
                          <div id="select*" class="detail">
                             <h4>SELECT * FROM TABLE</h4>
                             <h5>Syntax :</h5>
-                            <p> SELECT * FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> ;</p>
+                            <p> SELECT * FROM TABLE<i> source_relation</i> INTO <i>target_relation</i> ;</p>
                          
                             <h5> Description:</h5>
                             <p>This command creates a new target relation with the same attributes as that of source relation,and inserts into it all records from the source relation</p>
@@ -521,7 +521,7 @@ The datatypes of the attributes are determined from the values of the attributes
                              </div>
                          </div>
                          <div id="select_attr" class="detail">
-                            <h4>SELECT<i> Attrlist</i>FROM TABLE</h4>
+                            <h4>SELECT<i> Attrlist</i> FROM TABLE</h4>
                             <h5>Syntax :</h5>
                             <p> SELECT <i>Attribute1,Attribute2,....</i>FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> ;</p>
                           
@@ -543,7 +543,7 @@ The datatypes of the attributes are determined from the values of the attributes
                          <div id="select_*where" class="detail">
                             <h4>SELECT * FROM TABLE WHERE</h4>
                             <h5>Syntax :</h5>
-                            <p> SELECT * FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> WHERE <i>attrname OP value</i>;</p>
+                            <p> SELECT * FROM TABLE<i> source_relation</i> INTO <i>target_relation</i> WHERE <i>attrname OP value</i>;</p>
                       
                             <h5> Description:</h5>
                             <p>This command is used to retrieve all records of a given source relation, and insert them into a target relation, based on the the given condition. All records in the source relation that satisfy the condition, will be inserted into the newly created target relation.</p>
@@ -563,7 +563,7 @@ The datatypes of the attributes are determined from the values of the attributes
                              <p>Here, <i>OP</i> can only take a value from the set {=,>,<.>=,<=,!=}.</p>
                          </div>
                           <div id="select_attr_where" class="detail">
-                            <h4>SELECT<i> Attrlist</i>FROM TABLE</h4>
+                            <h4>SELECT<i> Attrlist</i> FROM TABLE WHERE</h4>
                             <h5>Syntax :</h5>
                             <p> SELECT <i>Attribute1,Attribute2,....</i>FROM TABLE<i>source_relation</i> INTO <i>target_relation</i> ;</p>
                            
@@ -585,18 +585,106 @@ The datatypes of the attributes are determined from the values of the attributes
                          <div id="select_*join" class="detail">
                             <h4>SELECT * FROM JOIN WHERE</h4>
                             <h5>Syntax :</h5>
-                            <p> SELECT * FROM <i>source_relation1</i> JOIN <i>source_relation2</i> INTO <i>target_relation</i> WHERE <i>attribute1</i>=<i> attribute2</i> ;</p>
+                            <p> SELECT * FROM <i>source_relation1</i> JOIN <i>source_relation2</i> INTO <i>target_relation</i> WHERE <i>source_relation1.attribute1</i> =<i> source_relation2.attribute2</i> ;</p>
                          
                             <h5> Description:</h5>
                             <p>This command creates a new target relation with attributes constituting from both the source relations(excluding specified attribute from 2nd src relation).It inserts the records obtained by equi-join of both the source relations(an attribute from each relation specified in arguments are used for equi-join) into the target relation.
 							</p>
+							<p>Note that <i>attribute1</i> should belong to <i>source_relation1</i> and <i>attribute2</i> should belong to <i>source_relation2</i>.</p>
                             <h5> Example:</h5>
                             <div class="algo">
                                 <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
                                     <table>
                                         <tr>
                                             <td>
-                                                <pre style="margin: 0; line-height: 125%">Example to be given</pre>
+                                                <p style="margin: 0; line-height: 125%">
+                                                	<p> Given below are the records of the relation <i>Student1</i>.</p>
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Name</td>
+                                                			<td>Batch</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>Anu</td>
+                                                			<td>A</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>Cody</td>
+                                                			<td>B</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>3</td>
+                                                			<td>Amy</td>
+                                                			<td>B</td>
+                                                		</tr>
+
+                                                	</table>
+                                                </p>
+                                                <p> Given below are the records of the relation <i>Student2</i>.</p>
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Marks</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>98</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>80</td>
+                                                	
+                                                		</tr>
+                                                		<tr>
+                                                			<td>3</td>
+                                                			<td>97</td>
+                                                			
+                                                		</tr>
+                                                		<tr>
+                                                			<td>4</td>
+                                                			<td>67</td>
+                                                			
+                                                		</tr>
+
+                                                	</table>
+                                                </p>
+                                                <p>An example for a join query is:<p>
+                                                <p> SELECT * FROM Students1 JOIN Students2 INTO Students WHERE Students1.Rollno = Students2.Rollno;</p>
+                                                 <p> Equi-join on these two relations based on the attribute <i>Rollno</i> would result in the following target relation,<i>Students</i>.
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Name</td>
+                                                			<td>Batch</td>
+                                                			<td>Marks</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>Anu</td>
+                                                			<td>A</td>
+                                                			<td>98</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>Cody</td>
+                                                			<td>B</td>
+                                                			<td>80</td>
+                                                	
+                                                		</tr>
+                                                		<tr>
+                                                			<td>3</td>
+                                                			<td>Amy</td>
+                                                			<td>B</td>
+                                                			<td>97</td>
+                                                			
+                                                		</tr>
+                                                		
+
+                                                	</table>
+                                                </p>
                                             </td>
                                         </tr>
                                     </table>
@@ -606,18 +694,107 @@ The datatypes of the attributes are determined from the values of the attributes
                          <div id="select_attr_join" class="detail">
                             <h4>SELECT <i>Attrlist</i> FROM JOIN WHERE</h4>
                             <h5>Syntax :</h5>
-                            <p> SELECT<i> Attribut1,Attribute2,..</i> FROM <i>source_relation1</i> JOIN <i>source_relation2</i> INTO <i>target_relation</i> WHERE <i>attribute1</i>=<i> attribute2</i> ;</p>
+                            <p> SELECT<i> Attribute1,Attribute2,..</i> FROM <i>source_relation1</i> JOIN <i>source_relation2</i> INTO <i>target_relation</i> WHERE <i>source_relation1.attribute1</i> =<i> source_relation2.attribute2</i> ;</p>
                            
                             <h5> Description:</h5>
                             <p>This command creates a new target relation with attributes given in <i>Attrlist</i>.It inserts the records(only the values of the specified attributes in <i>Attrlist</i> obtained by equi-join of both the source relations(an attribute from each relation specified in arguments are used for equi-join) into the target relation.
 							</p>
+							<p>Note that <i>attribute1</i> should belong to <i>source_relation1</i> and <i>attribute2</i> should belong to <i>source_relation2</i>.</p>
                             <h5> Example:</h5>
                             <div class="algo">
                                 <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .5em;padding:.2em .6em;border-radius:4px;">
                                     <table>
                                         <tr>
                                             <td>
-                                                <pre style="margin: 0; line-height: 125%">Example to be given</pre>
+                                                <p style="margin: 0; line-height: 125%">Example to be given
+                                                	<p style="margin: 0; line-height: 125%">
+                                                	<p> Given below are the records of the relation <i>Student1</i>.</p>
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Name</td>
+                                                			<td>Batch</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>Anu</td>
+                                                			<td>A</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>Cody</td>
+                                                			<td>B</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>3</td>
+                                                			<td>Amy</td>
+                                                			<td>B</td>
+                                                		</tr>
+
+                                                	</table>
+                                                </p>
+                                                <p> Given below are the records of the relation <i>Student2</i>.</p>
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Marks</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>98</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>80</td>
+                                                	
+                                                		</tr>
+                                                		<tr>
+                                                			<td>3</td>
+                                                			<td>97</td>
+                                                			
+                                                		</tr>
+                                                		<tr>
+                                                			<td>4</td>
+                                                			<td>67</td>
+                                                			
+                                                		</tr>
+
+                                                	</table>
+                                                </p>
+                                                <p>An example for a join query is:<p>
+                                                <p> SELECT Rollno,Name,Marks FROM Students1 JOIN Students2 INTO Students WHERE Students1.Rollno = Students2.Rollno;</p>
+                                                 <p> Equi-join on these two relations based on the attribute <i>Rollno</i> would result in the following target relation,<i>Students</i>.
+                                                	<table class="table table-bordered table-hover">
+                                                		<tr>
+                                                			<td>Rollno</td>
+                                                			<td>Name</td>
+                                                			
+                                                			<td>Marks</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>1</td>
+                                                			<td>Anu</td>
+                                                			
+                                                			<td>98</td>
+                                                		</tr>
+                                                		<tr>
+                                                			<td>2</td>
+                                                			<td>Cody</td>
+                                                			
+                                                			<td>80</td>
+                                                	
+                                                		</tr>
+                                                		<tr>
+                                                			<td>3</td>
+                                                			<td>Amy</td>
+                                                			<td>97</td>                                                			
+                                                			
+                                                		</tr>
+                                                		
+
+                                                	</table>
+                                                </p>
+                                                </p>
                                             </td>
                                         </tr>
                                     </table>
