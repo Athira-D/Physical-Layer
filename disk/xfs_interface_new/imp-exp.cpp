@@ -104,23 +104,36 @@ void import(char *filename)
      
 	i=0;
 	//type array contains the types of all attributes
-	char newfilename[(strlen(filename))-4];
+	char newfilename[16];
 	int loopv=0;
 	while(filename[loopv]!='.')
-		{
-		newfilename[loopv]=filename[loopv];
+	{
+		//newfilename[loopv]=filename[loopv];
 		loopv++;
-		}
-	newfilename[loopv]='\0';
-          int ret;
-          ret=createRel(newfilename,count,attribute,type);
-          if(ret!=SUCCESS)
+	}
+	loopv--;
+	int end=loopv;;
+	while(filename[loopv]!='/')
+	{
+		loopv--;
+	}
+	int start=loopv+1;
+	int f=0;
+	for(;start<=end;start++)
+	{
+		newfilename[f]=filename[start];
+		f++;
+	}
+	newfilename[f]='\0';
+    int ret;
+    ret=createRel(newfilename,count,attribute,type);
+    if(ret!=SUCCESS)
 	{
 		cout<<"IMPORT NOT POSSIBLE\n";
 		return;
 	}	
-          int relid=openRel(newfilename);
-          if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
+    int relid=openRel(newfilename);
+    if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
 	{
 		cout<<"IMPORT NOT POSSIBLE\n";
 		return;
@@ -199,6 +212,11 @@ void exp(char *rel_name,char *exportname)
 {
 	//cout<<"here\n";
 	FILE *fp_export=fopen(exportname,"w");
+	if(!fp_export)
+	{
+		cout<<" Invalid file path"<<endl;
+		return ;
+	}
 	struct HeadInfo header;
           int i,first_block;
 	union Attribute rec[6]; //for relation catalog entry
@@ -566,11 +584,11 @@ void db()
 	}
 }
 
-int main()
+/*int main()
 {
 createdisk();
 formatdisk();
-meta();
+meta();*/
 /*import("rel1.csv");
 import("sample.csv");
 import("rel2.csv");
@@ -619,13 +637,13 @@ ls();
 exp("join3","rel_join3");
 
 */
-import("sample.csv");
+/*import("sample.csv");
 
 int relid=openRel("sample");
 bplus_create(relid,"MARK");
 dropindex(relid,"MARK");
 
 
-}
+}*/
 
 
