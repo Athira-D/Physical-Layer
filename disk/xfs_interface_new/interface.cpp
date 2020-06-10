@@ -9,10 +9,28 @@ vector <string> strip_whitespace(string input_command)
 	string temp="";
 	for(int i=0;i<input_command.length();i++)
 	{
-		if(input_command[i]==' '||input_command[i]==';')
+		if(input_command[i]=='('||input_command[i]==')')
 		{
 			if(temp!="")
-			{words.push_back(temp);}
+			{
+			words.push_back(temp);
+			}
+			temp="";
+		}
+		else if(input_command[i]==',')
+		{
+			if(temp!="")
+			{
+			words.push_back(temp);
+			}
+			temp="";
+		}
+		else if(input_command[i]==' '||input_command[i]==';')
+		{
+			if(temp!="")
+			{
+			words.push_back(temp);
+			}
 			temp="";
 		}
 		else
@@ -26,7 +44,7 @@ vector <string> strip_whitespace(string input_command)
 	for(auto i= words.begin();i!=words.end();i++)
 	{
 		
-		cout<<*i<<endl;
+		//cout<<*i<<endl;
 	}
 	return words;
 }
@@ -49,7 +67,7 @@ bool check_filenamelength(string filepath)
 
 int main()
 {
-	
+	//import("sample.csv");
 	while(1)
 	{
 		cout<<"# ";
@@ -81,7 +99,7 @@ int main()
 		{
 			if(s.size()==1)
 			{
-				cout<<"fdisk"<<endl;
+				//cout<<"fdisk"<<endl;
 				createdisk();
 				formatdisk();
 				meta();
@@ -170,13 +188,109 @@ int main()
 				dump_attrcat();
 			}
 		}
-		else if(first=="create")
+		else if(first=="create"||first=="CREATE")
 		{
-
+			string second=s[1];
+			if(second=="TABLE"||second=="table")
+			{
+				string third=s[2];
+				char tablename[16];
+				int i;
+				for(i=0;i<15;i++)
+					tablename[i]=third[i];
+				int no_attrs=(s.size()-3)/2;
+				char attribute[no_attrs][16];
+				int type_attr[no_attrs];
+				int k;
+				for(k=0,i=3;i<s.size();i++,k++)
+				{
+					for(int j=0;j<15;j++)
+						attribute[k][j]=s[i][j];
+					i++;
+					if(s[i]=="INT" || s[i]=="int")
+						type_attr[k]=INT;
+					else if(s[i]=="FLOAT" || s[i]=="float")
+						type_attr[k]=FLOAT;
+					else if(s[i]=="STRING" || s[i]=="string"|| s[i]=="str"|| s[i]=="STR")
+						type_attr[k]=STRING;
+					else
+					{     
+						cout<<"Syntax Error"<<endl;
+						continue;
+					}
+					
+				}
+				createRel(tablename,no_attrs,attribute,type_attr);	
+			}
+			if(second=="INDEX"||second=="index")
+			{
+				string third=s[2];
+				if(third!="ON")
+				{	
+					cout<<"Syntax Error"<<endl;
+					continue;
+				}
+				else
+				{
+					string t=s[3];
+					cout<<t<<"\n";
+					char tablename[16],attrname[16];
+					int i;
+					for(i=0;t[i]!='.';i++)
+						tablename[i]=t[i];
+					tablename[i++]='\0';
+					int k;
+					for(k=0;i<t.size();i++,k++)
+					{
+						attrname[k]=t[i];
+					}
+					attrname[k]='\0';
+					int relid=openRel(tablename);
+					cout<<relid<<" "<<attrname<<"\n";
+					bplus_create(relid,attrname);	
+				  }
+			}
 		}
-		else if(first=="drop")
+		else if(first=="drop"||first=="DROP")
 		{
-
+			string second=s[1];
+			if(second=="TABLE"||second=="table")
+			{
+				string third=s[2];
+				char tablename[16];
+				int i;
+				for(i=0;i<15;i++)
+					tablename[i]=third[i];
+				ba_delete(tablename);	
+			}
+			else if(second=="INDEX"||second=="index")
+			{
+				string third=s[2];
+				if(third!="ON")
+				{	
+					cout<<"Syntax Error"<<endl;
+					continue;
+				}
+				else
+				{
+					string t=s[3];
+					cout<<t<<"\n";
+					char tablename[16],attrname[16];
+					int i;
+					for(i=0;t[i]!='.';i++)
+						tablename[i]=t[i];
+					tablename[i++]='\0';
+					int k;
+					for(k=0;i<t.size();i++,k++)
+					{
+						attrname[k]=t[i];
+					}
+					attrname[k]='\0';
+					int relid=openRel(tablename);
+					cout<<relid<<" "<<attrname<<"\n";
+					dropindex(relid,attrname);	
+				  }
+			}
 		}
 		else if(first=="open"||first=="OPEN")
 		{
@@ -247,6 +361,39 @@ int main()
 				cout<<"Syntax Error"<<endl;
 				
 			}
+		}
+		else if(first=="insert"||first=="INSERT")
+		{
+			string third=s[3];
+			char tablename[16];
+			int i;
+			for(i=0;i<15;i++)
+				tablename[i]=third[i];
+			tablename[i]='\0';
+			string fifth=s[5];
+			if(fifth=="FROM" || fifth=="from")
+			{	
+				string filepath = s[6];
+				char f[filepath.length()];
+				int i=0;
+				for(i=0;i<filepath.length();i++)
+				{
+					f[i]=filepath[i];
+				}
+				f[i]='\0';
+				FILE * file=fopen(f,"r");
+				if(!file)
+				{
+					cout<<"Invalid file path or file does not exist"<<endl;
+					continue;
+				}
+				fclose(file);
+				insert(tablename,f);
+			 }
+			 else
+			 {
+				insert_val(s,tablename);
+			 }
 		}
 		else if(first=="alter"||first=="ALTER")
 		{

@@ -476,6 +476,7 @@ int bplus_destroy(int block_num)
 	{
 	    deleteBlock(block_num);
 	}
+	cout<<"INDEX DELETED\n";
 	return SUCCESS;
 }
 
@@ -584,7 +585,8 @@ int bplus_create(int relid, char AttrName[ATTR_SIZE])
 			}
 		}
 		data_block = header.rblock; //next data block for the relation
-	   }   
+	   } 
+	   cout<<"INDEX CREATED\n";
 	    return SUCCESS;
 }	
 
