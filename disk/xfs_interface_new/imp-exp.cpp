@@ -87,27 +87,41 @@ void insert_val(vector <string> s,char tablename[16])
 		cout<<"Mismatch in no of arguments\n";
 		return;
 	}
-          
+          //cout<<"hi\n";
+	//cout<<count<<"\n";
        	for(int i=0;i<count;i++)
 	{
 		string x=s[i+5];
-		for(int j=0;i=j<15;j++)
-			record_array[i][j]=x[j];
+		char p[16];
+		int j;
+		for(j=0;j<15&&j<x.size();j++)
+		{
+			p[j]=x[j];
+		}
+		p[j]='\0';
+		strcpy(record_array[i],p);
 	}	
+	
           union Attribute rec[count];
           for(int l=0;l<count;l++)
 	{
 	   	if(type[l]==FLOAT)
 		       {
+		       cout<<record_array[l]<<"\n";
                            rec[l].fval=atof(record_array[l]);
+		       //cout<<rec[l].fval<<"\n";
 		       }
 		if(type[l]==INT)
 		       {
+		       cout<<record_array[l]<<"\n";
                            rec[l].ival=strtoull(record_array[l],NULL,10);
+		       //cout<<rec[l].ival<<"\n";
 		       }
 		if(type[l]==STRING)
 		       {
+		       cout<<record_array[l]<<"\n";
                            strcpy(rec[l].sval,record_array[l]);
+		       //cout<<rec[l].sval<<"\n";
 		       }
 	}
           int r; 
@@ -774,26 +788,8 @@ void db()
 
 /*int main()
 {
-createdisk();
-formatdisk();
-meta();
-import("rel1.csv");
-import("sample.csv");
-import("rel2.csv");
-ls();
-/*
-ba_renamerel("sample","rel3");
-ls();
-ba_renameattr("rel3","CGPA","SGPA");
-ba_delete("rel3");
-dump_attrcat();
-dump_relcat();
-ls();
-db();
-exp("rel1","rel_1");
-exp("rel2","rel_2");
-exp("rel3","rel_3");
-//int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char strval[ATTR_SIZE])
+
+
 openRel("rel1");
 select("rel1","rel11","CGPA",LE,"9.6");
 exp("rel11","rel_11");

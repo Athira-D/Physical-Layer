@@ -91,10 +91,6 @@ int main()
 		{
 			ls();
 		}
-		else if(first=="SELECT"||first=="select")
-		{
-			cout<<"select"<<endl;
-		}
 		else if(first=="fdisk")
 		{
 			if(s.size()==1)
@@ -361,6 +357,213 @@ int main()
 				cout<<"Syntax Error"<<endl;
 				
 			}
+		}
+		else if(first=="select"||first=="SELECT")
+		{
+			
+			string second=s[1];
+			if(second=="*")
+			{
+				if(s.size()==7) //SELECT * FROM TABLE
+				{
+					string x=s[4];
+					char source_table[16];
+					int i;
+					for(i=0;i<15;i++)
+						source_table[i]=x[i];
+					source_table[i]='\0';
+					x=s[6];
+					char tar_table[16];
+					for(i=0;i<15;i++)
+						tar_table[i]=x[i];
+					tar_table[i]='\0';
+					
+					//-----------------------------------------
+					int relid=openRel(source_table);
+					if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
+					{
+						cout<<"SELECT NOT POSSIBLE\n";
+						continue;
+					}
+   					union Attribute relcatentry[6];
+					if(getRelCatEntry(relid,relcatentry)!=SUCCESS)
+					{
+						cout<<"SELECT NOT POSSIBLE\n";
+       						continue;
+					}
+					int nAttrs;
+					nAttrs = relcatentry[1].ival;
+					char tar_attrs[nAttrs][ATTR_SIZE];
+					union Attribute attr[6];
+					int attr_blk=5;
+					struct HeadInfo h;
+					while(attr_blk != -1)
+					{
+						h=getheader(attr_blk);
+						unsigned char slotmap[h.numSlots];
+						getSlotmap(slotmap,attr_blk);
+						for(int i=0;i<20;i++)
+      						{
+        	    	   				  getRecord(attr,attr_blk,i);
+		    				  if((char)slotmap[i]=='0')
+		    		 	            {
+							continue;
+		    				 }
+		     				 if(strcmp(attr[0].sval,source_table)==0) 
+		    				 {
+	              					strcpy(tar_attrs[attr[5].ival],attr[1].sval);
+		     				 } 
+					   }
+					   attr_blk =h.rblock;
+					}
+					//---------------------------------------------------
+					project(source_table,tar_table,nAttrs,tar_attrs);
+				}
+				else if(s.size()==11) //SELECT * FROM TABLE WHERE
+				{
+					string x=s[4];
+					char source_table[16];
+					int i;
+					for(i=0;i<15;i++)
+						source_table[i]=x[i];
+					source_table[i]='\0';
+					x=s[6];
+					char tar_table[16];
+					for(i=0;i<15;i++)
+						tar_table[i]=x[i];
+					tar_table[i]='\0';
+					x=s[8];
+					char attr_name[16];
+					for(i=0;i<15;i++)
+						attr_name[i]=x[i];
+					attr_name[i]='\0';
+					x=s[10];
+					char attr_value[16];
+					for(i=0;i<15;i++)
+						attr_value[i]=x[i];
+					attr_value[i]='\0';
+					x=s[9];
+					int op;
+					if(x=="EQ"||x=="eq"||x=="="||x=="==")
+					{
+						op=EQ;
+					}
+					if(x=="LE"||x=="le"||x=="<=")
+					{
+						op=LE;
+					}
+					if(x=="GE"||x=="ge"||x==">=")
+					{
+						op=GE;
+					}
+					if(x=="LT"||x=="lt"||x=="<")
+					{
+						op=LT;
+					}
+					if(x=="GT"||x=="GT"||x==">")
+					{
+						op=GT;
+					}
+					if(x=="NE"||x=="ne"||x=="!=")
+					{
+						op=NE;
+					}
+					//------------------------------------------------------------------
+					int relid=openRel(source_table);
+					if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
+					{
+						cout<<"SELECT NOT POSSIBLE\n";
+						continue;
+					}
+   					union Attribute relcatentry[6];
+					if(getRelCatEntry(relid,relcatentry)!=SUCCESS)
+					{
+						cout<<"SELECT NOT POSSIBLE\n";
+       						continue;
+					}
+					int nAttrs;
+					nAttrs = relcatentry[1].ival;
+					char tar_attrs[nAttrs][ATTR_SIZE];
+					union Attribute attr[6];
+					int attr_blk=5;
+					struct HeadInfo h;
+					while(attr_blk != -1)
+					{
+						h=getheader(attr_blk);
+						unsigned char slotmap[h.numSlots];
+						getSlotmap(slotmap,attr_blk);
+						for(int i=0;i<20;i++)
+      						{
+        	    	   				  getRecord(attr,attr_blk,i);
+		    				  if((char)slotmap[i]=='0')
+		    		 	            {
+							continue;
+		    				 }
+		     				 if(strcmp(attr[0].sval,source_table)==0) 
+		    				 {
+	              					strcpy(tar_attrs[attr[5].ival],attr[1].sval);
+		     				 } 
+					   }
+					   attr_blk =h.rblock;
+					}
+					//---------------------------------------------------
+					cout<<tar_table<<"\n"<<nAttrs<<"\n"<<op<<"\n"<<attr_value;
+					select(source_table,"temp",attr_name,op,attr_value);
+					project("temp",tar_table,nAttrs,tar_attrs);
+					ba_delete("temp");
+				}
+				else if(s.size()==12) //SELECT * FROM JOIN WHERE
+
+				{
+					string x=s[3];
+					char source_table1[16];
+					int i;
+					for(i=0;i<15;i++)
+						source_table1[i]=x[i];
+					source_table1[i]='\0';
+					x=s[5];
+					char source_table2[16];
+					for(i=0;i<15;i++)
+						source_table2[i]=x[i];
+					source_table2[i]='\0';
+					x=s[7];
+					char tar_table[16];
+					for(i=0;i<15;i++)
+						tar_table[i]=x[i];
+					tar_table[i]='\0';
+					x=s[9];
+					char attr1[16];
+					int j;
+					for(i=0;x[i]!='.';i++)
+						continue;
+					for(i=i+1,j=0;i<x.size();i++,j++)
+						attr1[j]=x[i];
+					attr1[j]='\0';
+					x=s[11];
+					char attr2[16];
+					for(i=0;x[i]!='.';i++)
+						continue;
+					for(i=i+1,j=0;i<x.size();i++,j++)
+						attr2[j]=x[i];
+					attr2[j]='\0';
+					openRel(source_table1);
+					openRel(source_table2);
+					int ret=join(source_table1,source_table2,tar_table,attr1,attr2);
+					if(ret==FAILURE)
+					{
+						cout<<"Join Failed\n";
+					}
+				}
+				else
+				{
+					cout<<"INVALID SYNTAX\n";
+					continue;
+				}	
+			}
+			else
+			{
+
+			}	
 		}
 		else if(first=="insert"||first=="INSERT")
 		{
