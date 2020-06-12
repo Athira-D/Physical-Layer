@@ -1,8 +1,10 @@
 // Code for XFS Interface (for Unix) 
+// To Do:  Students cannot name their relations "temp"
 
 #include<bits/stdc++.h>
 #include "imp-exp.cpp"
 using namespace std;
+
 vector <string> strip_whitespace(string input_command)
 {
 	vector <string> words;
@@ -44,7 +46,7 @@ vector <string> strip_whitespace(string input_command)
 	for(auto i= words.begin();i!=words.end();i++)
 	{
 		
-		//cout<<*i<<endl;
+		cout<<*i<<endl;
 	}
 	return words;
 }
@@ -80,7 +82,7 @@ int main()
 		if(first=="EXIT"||first=="exit")
 		{
 			if(s.size()==1)
-				break;
+				exit(0);
 			else
 			{
 				cout<<"Syntax Error"<<endl;
@@ -508,9 +510,9 @@ int main()
 					}
 					//---------------------------------------------------
 					cout<<tar_table<<"\n"<<nAttrs<<"\n"<<op<<"\n"<<attr_value;
-					select(source_table,"temp",attr_name,op,attr_value);
-					project("temp",tar_table,nAttrs,tar_attrs);
-					ba_delete("temp");
+					select(source_table,tar_table,attr_name,op,attr_value);
+					//project("temp",tar_table,nAttrs,tar_attrs);
+					//ba_delete("temp");
 				}
 				else if(s.size()==12) //SELECT * FROM JOIN WHERE
 
@@ -561,7 +563,191 @@ int main()
 				}	
 			}
 			else
-			{
+			{	
+				int ctr=0;
+				int i=1;
+				for(;s[i]!="from"&&s[i]!="FROM";i++)
+				{
+					ctr++;
+				}
+				int from_pos=i;
+				char attr_list[ctr][16];
+				i=1;
+				int k=0;
+				for(;s[i]!="from"&&s[i]!="FROM"&&k<ctr;i++,k++)
+				{
+					
+					int j;
+					for( j=0;j<15;j++)
+						attr_list[k][j]=s[i][j];
+					attr_list[k][j]='\0';
+					
+				}
+				int total_size=s.size();
+				char src_rel[16];
+				char tar_rel[16];
+				if(total_size-from_pos==4)// Select Attrlist from table
+				{
+					string src=s[from_pos+1];
+					//char src_rel[16];
+					for(i=0;i<15;i++)
+					{
+						src_rel[i]=src[i];
+					}
+					src_rel[i]='\0';
+					src=s[from_pos+3];
+					//char tar_rel[16];
+				
+					for(i=0;i<15;i++)
+					{
+						tar_rel[i]=src[i];
+					}
+					tar_rel[i]='\0';
+					//cout<<src_rel<<" "<<tar_rel<<endl;
+					cout<<ctr<<endl;
+					project(src_rel,tar_rel,ctr,attr_list);
+
+				}
+				else if(s[from_pos+4]=="WHERE"||s[from_pos+4]=="where")
+				{
+					char attrname[16];
+					int i;
+					for(i=0;i<15;i++)
+					{
+						attrname[i]=s[from_pos+5][i];
+					}
+					attrname[i]='\0';
+					string x=s[from_pos+6];
+					int op;
+					if(x=="EQ"||x=="eq"||x=="="||x=="==")
+					{
+						op=EQ;
+					}
+					if(x=="LE"||x=="le"||x=="<=")
+					{
+						op=LE;
+					}
+					if(x=="GE"||x=="ge"||x==">=")
+					{
+						op=GE;
+					}
+					if(x=="LT"||x=="lt"||x=="<")
+					{
+						op=LT;
+					}
+					if(x=="GT"||x=="GT"||x==">")
+					{
+						op=GT;
+					}
+					if(x=="NE"||x=="ne"||x=="!=")
+					{
+						op=NE;
+					}
+					char attrval[16];
+					x=s[from_pos+7];
+					for(i=0;i<15;i++)
+						attrval[i]=x[i];
+					attrval[i]='\0';
+					openRel(src_rel);
+					select(src_rel,"temp",attrname,op,attrval);
+					project("temp",tar_rel,ctr,attr_list);
+					deleteRel("temp");
+
+				}
+				else if((s[from_pos+2]=="join")||(s[from_pos+2]=="JOIN"))
+				{
+					string src=s[from_pos+1];
+					char src_rel1[16];
+					for(i=0;i<15;i++)
+					{
+						src_rel1[i]=src[i];
+					}
+					src_rel1[i]='\0';
+					src=s[from_pos+3];
+					char src_rel2[16];
+					for(i=0;i<15;i++)
+					{
+						src_rel2[i]=src[i];
+					}
+					src_rel2[i]='\0';
+					if((s[from_pos+4]=="into"||s[from_pos+4]=="INTO")&&(s[from_pos+6]=="WHERE"||s[from_pos+6]=="where") &&s[from_pos+8]=="="&&(s.size()-from_pos==10))
+					{
+						string x=s[from_pos+5];
+						char tar_rel[16];
+						for(i=0;i<15;i++)
+						{
+							tar_rel[i]=x[i];
+						}
+						tar_rel[i]='\0';
+						string attr1=s[from_pos+7];
+						string attr2=s[from_pos+9];
+						char attribute1[16];
+						for(i=0;i<15;i++)
+							attribute1[i]=attr1[i];
+						attribute1[i]='\0';
+						char attribute2[16];
+						for(i=0;i<15;i++)
+							attribute2[i]=attr2[i];
+						attribute2[i]='\0';
+						int relid1=openRel(src_rel1);
+						if(relid1== E_RELNOTEXIST)
+						{
+							cout<<"Open Relation Failed : Relation does not exist"<<endl;
+							continue;
+						}
+						else if(relid1==E_CACHEFULL)
+						{
+							cout<<"Open Relation Failed : Relation cache is full"<<endl;
+							continue;
+						}
+
+						int relid2=openRel(src_rel2);
+						if(relid2== E_RELNOTEXIST)
+						{
+							cout<<"Open Relation Failed : Relation does not exist"<<endl;
+							continue;
+						}
+						else if(relid2==E_CACHEFULL)
+						{
+							cout<<"Open Relation Failed : Relation cache is full"<<endl;
+							continue;
+						}
+
+						int ret=join(src_rel1,src_rel2,tar_rel,attribute1,attribute2);
+						if(ret==E_RELNOTOPEN)
+						{
+							cout<<"Join Failed : At least one relation is not open"<<endl;
+							continue;
+						}
+						else if(ret==E_ATTRNOTEXIST)
+						{
+							cout<<"Open Relation Failed : Relation cache is full"<<endl;
+							continue;
+						}
+						else if(ret==E_ATTRTYPEMISMATCH)
+						{
+							cout<<"Open Relation Failed : Relation cache is full"<<endl;
+							continue;
+						}
+
+
+					}
+					else
+					{
+						cout<<"Syntax Error"<<endl;
+						
+
+					}
+
+				}
+				else
+				{
+					cout<<"Syntax Error"<<endl;
+				}
+
+				
+
+
 
 			}	
 		}
