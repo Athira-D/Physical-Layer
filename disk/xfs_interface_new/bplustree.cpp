@@ -29,12 +29,13 @@ int setAttrCatEntry(int rel_id, char attrname[16],union Attribute attrcat_entry[
 		{
 			getRecord(attr_entry,curr_block,i);
 			//cout<<"rel name: "<<attrcat_entry[0].sval<<"\n";
-			if(strcmp(attrcat_entry[0].sval,rel_name)==0)
+			if(strcmp(attr_entry[0].sval,rel_name)==0)
 			{
-				if(strcmp(attrcat_entry[1].sval,attrname)==0)
+				if(strcmp(attr_entry[1].sval,attrname)==0)
 				{
 					setRecord(attrcat_entry,curr_block,i);
 					return SUCCESS;
+					
 				}
 			}
 		}
@@ -69,8 +70,8 @@ int setEntry(struct InternalEntry internalentry,int block,int offset)
 
 int setLeafEntry(struct Index rec,int leaf,int offset)
 {
-	cout<<"In Leaf\n";
-	cout<<rec.attrVal.ival<<" "<<rec.block<<" "<<rec.slot<<"\n"<<leaf<<" "<<offset<<"\n\n";
+	cout<<"Leaf Node:\n";
+	cout<<"Value:"<<rec.attrVal.ival<<" "<<rec.block<<" "<<rec.slot<<"\nLeaf Block:"<<leaf<<" "<<offset<<"\n\n";
 	FILE *disk=fopen("disk","rb+");
 	fseek(disk,leaf*BLOCK_SIZE+32+offset*32,SEEK_SET);
 	fwrite(&rec,sizeof(rec),1,disk);
@@ -530,6 +531,7 @@ int bplus_create(int relid, char AttrName[ATTR_SIZE])
 	setheader(&H,root_block);
 
 	attrcatentry[4].ival= root_block;
+	cout<<root_block<<"\n";
 	if(setAttrCatEntry(relid, AttrName, attrcatentry)!=SUCCESS)
 		return FAILURE;
 

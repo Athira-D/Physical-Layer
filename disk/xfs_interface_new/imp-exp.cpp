@@ -107,19 +107,19 @@ void insert_val(vector <string> s,char tablename[16])
 	{
 	   	if(type[l]==FLOAT)
 		       {
-		       cout<<record_array[l]<<"\n";
+		      // cout<<record_array[l]<<"\n";
                            rec[l].fval=atof(record_array[l]);
 		       //cout<<rec[l].fval<<"\n";
 		       }
 		if(type[l]==INT)
 		       {
-		       cout<<record_array[l]<<"\n";
+		       //cout<<record_array[l]<<"\n";
                            rec[l].ival=strtoull(record_array[l],NULL,10);
 		       //cout<<rec[l].ival<<"\n";
 		       }
 		if(type[l]==STRING)
 		       {
-		       cout<<record_array[l]<<"\n";
+		       //cout<<record_array[l]<<"\n";
                            strcpy(rec[l].sval,record_array[l]);
 		       //cout<<rec[l].sval<<"\n";
 		       }
@@ -127,6 +127,10 @@ void insert_val(vector <string> s,char tablename[16])
           int r; 
 	
           r=ba_insert(relid,rec);
+	if(r==SUCCESS)
+		cout<<"SUCCESS\n";
+	else
+		cout<<"FAILURE\n";
           closeRel(relid);
           return;
 }
@@ -592,6 +596,7 @@ void dump_attrcat()
       		} 
 		attr_blk =h.rblock;
 	}
+	fclose(fp_export);
 }
 
 void dump_relcat()
@@ -661,6 +666,7 @@ void dump_relcat()
 	               fputs(s,fp_export); 
 		     fputs("\n",fp_export);
       	         }
+	fclose(fp_export);
 }
 
 void ls()
@@ -762,7 +768,7 @@ void db()
 	          fputs(s,fp_export); 
 		fputs(": Block Allocation Map\n",fp_export);
 	}
-	for(iter=4;iter<4*BLOCK_SIZE;iter++)
+	for(iter=4;iter<8192;iter++)
 	{
 		fputs("Block ",fp_export);
 		sprintf(s, "%d",iter);
@@ -784,6 +790,8 @@ void db()
 			fputs(": Leaf Index Block\n",fp_export);
 		}
 	}
+	
+	fclose(fp_export);
 }
 
 /*int main()

@@ -40,8 +40,7 @@ void formatdisk(){
 	for(int i=reserved;i<offset;i++)
 	{
 		fputc(0,disk);
-	}	
-	
+	}		
 	fclose(disk);
 }
 

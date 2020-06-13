@@ -5,9 +5,9 @@ Block 3: Block Allocation Map
 Block 4: Record Block
 Block 5: Record Block
 Block 6: Record Block
-Block 7: Record Block
+Block 7: Leaf Index Block
 Block 8: Unused Block
-Block 9: Record Block
+Block 9: Unused Block
 Block 10: Unused Block
 Block 11: Unused Block
 Block 12: Unused Block

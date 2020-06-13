@@ -46,7 +46,7 @@ vector <string> strip_whitespace(string input_command)
 	for(auto i= words.begin();i!=words.end();i++)
 	{
 		
-		cout<<*i<<endl;
+		//cout<<*i<<endl;
 	}
 	return words;
 }
@@ -78,7 +78,7 @@ int main()
 		getline(cin,input_command);
 		vector <string> s= strip_whitespace(input_command);
 		string first=s[0];
-		cout<<first<<endl;
+		//cout<<first<<endl;
 		if(first=="EXIT"||first=="exit")
 		{
 			if(s.size()==1)
@@ -231,7 +231,7 @@ int main()
 				else
 				{
 					string t=s[3];
-					cout<<t<<"\n";
+					//cout<<t<<"\n";
 					char tablename[16],attrname[16];
 					int i;
 					for(i=0;t[i]!='.';i++)
@@ -244,7 +244,7 @@ int main()
 					}
 					attrname[k]='\0';
 					int relid=openRel(tablename);
-					cout<<relid<<" "<<attrname<<"\n";
+					//cout<<relid<<" "<<attrname<<"\n";
 					bplus_create(relid,attrname);	
 				  }
 			}
@@ -272,11 +272,16 @@ int main()
 				else
 				{
 					string t=s[3];
-					cout<<t<<"\n";
+					//cout<<t<<"\n";
 					char tablename[16],attrname[16];
 					int i;
-					for(i=0;t[i]!='.';i++)
+					for(i=0;t[i]!='.'&&i<t.size();i++)
 						tablename[i]=t[i];
+					if(i==t.size())
+					{
+						cout<<"Syntax Error!!!\n";
+						continue;
+					}
 					tablename[i++]='\0';
 					int k;
 					for(k=0;i<t.size();i++,k++)
@@ -285,9 +290,15 @@ int main()
 					}
 					attrname[k]='\0';
 					int relid=openRel(tablename);
-					cout<<relid<<" "<<attrname<<"\n";
-					dropindex(relid,attrname);	
+					//cout<<relid<<" "<<attrname<<"\n";
+					int ret=dropindex(relid,attrname);
+					if(ret!=SUCCESS)
+						cout<<"FAILED!!!\n";	
 				  }
+			}
+			else
+			{
+				cout<<"Syntax Error\n";
 			}
 		}
 		else if(first=="open"||first=="OPEN")
@@ -350,7 +361,7 @@ int main()
 				}
 				else
 				{
-					cout<<" Relation opened successfully"<<endl;
+					cout<<" Relation closed successfully"<<endl;
 				}
 
 			}
@@ -870,7 +881,7 @@ int main()
 		}
 		else
 		{
-			cout<<"Syntax Error. Type \"help\" for the list of commands"<<endl;
+			cout<<"Syntax Error. "<<endl;
 		}
 
 

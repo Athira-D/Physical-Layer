@@ -711,6 +711,14 @@ int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName
 //Todo: updating last block of attribute catalog
 int ba_delete(char relName[ATTR_SIZE])
 {
+	for(int ind=0;ind<12;ind++)
+      	{  
+	if(strcmp(relName,OpenRelTable[ind])==0)
+           	{
+			cout<<"Cannot delete relation which is open\n";
+			return FAILURE;
+		}
+         }
 	/* search for relation with name relName in relation catalog */
 	recId relcat_recid,prev_recid={-1,-1};
 	union Attribute temp;
