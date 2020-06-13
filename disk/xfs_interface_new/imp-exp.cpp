@@ -37,20 +37,21 @@ int check_type(char *data)
 		return STRING;
 }
 
-void insert_val(vector <string> s,char tablename[16])
+int insert_val(vector <string> s,char tablename[16])
 {
 	char ch;
-	int relid=openRel(tablename);
-	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
+	int relid=getRelId(tablename);
+	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||E_RELNOTOPEN)
 	{
-		cout<<"INSERT NOT POSSIBLE\n";
-		return;
+		return relid;
 	}
    	union Attribute relcatentry[6];
-	if(getRelCatEntry(relid,relcatentry)!=SUCCESS)
+   	int y;
+   	y=getRelCatEntry(relid,relcatentry);
+	if(y!=SUCCESS)
 	{
-		cout<<"INSERT NOT POSSIBLE\n";
-       		return;
+		//cout<<"INSERT NOT POSSIBLE\n";
+       		return y;
 	}
 	int count;
 	count = relcatentry[1].ival;
@@ -82,16 +83,16 @@ void insert_val(vector <string> s,char tablename[16])
 	}
 	//-----------------------------------------------------
           char record_array[count][16];
-	if(s.size()-5!=count)
+	if(s.size()!=count)
 	{
 		cout<<"Mismatch in no of arguments\n";
-		return;
+		return E_NATTRMISMATCH;
 	}
           //cout<<"hi\n";
 	//cout<<count<<"\n";
        	for(int i=0;i<count;i++)
 	{
-		string x=s[i+5];
+		string x=s[i];
 		char p[16];
 		int j;
 		for(j=0;j<15&&j<x.size();j++)
@@ -128,28 +129,34 @@ void insert_val(vector <string> s,char tablename[16])
 	
           r=ba_insert(relid,rec);
 	if(r==SUCCESS)
-		cout<<"SUCCESS\n";
+	{cout<<"SUCCESS\n";
+		return SUCCESS;
+	}
 	else
+	{
 		cout<<"FAILURE\n";
-          closeRel(relid);
-          return;
+		return FAILURE;
+	}	
+          
+          
 }
 
 int insert(char tablename[16],char *filename)
 {
 	FILE *file=fopen(filename,"r");
 	char ch;
-	int relid=openRel(tablename);
-	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
+	int relid=getRelId(tablename);
+	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||E_RELNOTOPEN)
 	{
 		cout<<"INSERT NOT POSSIBLE\n";
-		return FAILURE;
+		return relid;
 	}
    	union Attribute relcatentry[6];
-	if(getRelCatEntry(relid,relcatentry)!=SUCCESS)
+   	int y=getRelCatEntry(relid,relcatentry);
+	if(y!=SUCCESS)
 	{
 		cout<<"INSERT NOT POSSIBLE\n";
-       		return FAILURE;
+       		return y;
 	}
 	int count;
 	count = relcatentry[1].ival;
@@ -237,13 +244,13 @@ int insert(char tablename[16],char *filename)
 	 if(ch==EOF)	
                    break;
           }
-          closeRel(relid);
+          //closeRel(relid);
 	fclose(file);
           return SUCCESS;
 }
 
 
-void import(char *filename)
+int import(char *filename)
 {
      FILE *file=fopen(filename,"r");
      //attr : first line in the file	
@@ -336,13 +343,13 @@ void import(char *filename)
     if(ret!=SUCCESS)
 	{
 		cout<<"IMPORT NOT POSSIBLE\n";
-		return;
+		return FAILURE;
 	}	
     int relid=openRel(newfilename);
     if(relid==E_CACHEFULL||relid==E_RELNOTEXIST)
 	{
 		cout<<"IMPORT NOT POSSIBLE\n";
-		return;
+		return FAILURE;
 	}
 	file=fopen(filename,"r");
 	while((ch = fgetc(file)) != '\n')
@@ -405,23 +412,24 @@ void import(char *filename)
           {
 		closeRel(relid);
 		ba_delete(newfilename);
-                    return;
+                    return FAILURE;
           }
 	 if(ch==EOF)	
                    break;
           }
           closeRel(relid);
 	fclose(file);
+	return SUCCESS;
 }
 
-void exp(char *rel_name,char *exportname)
+int exp(char *rel_name,char *exportname)
 {
 	//cout<<"here\n";
 	FILE *fp_export=fopen(exportname,"w");
 	if(!fp_export)
 	{
 		cout<<" Invalid file path"<<endl;
-		return ;
+		return FAILURE;
 	}
 	struct HeadInfo header;
           int i,first_block;
@@ -440,13 +448,13 @@ void exp(char *rel_name,char *exportname)
       	//cout<<"exited\n";
      	if(i==20)
        	{
-       	        cout<<"EXPORT NOT POSSIBLE!\n";
-	        return;
+       	    cout<<"EXPORT NOT POSSIBLE!\n";
+	        return FAILURE;
      	}
 	if(first_block==-1)
 	{
 		cout<<"No records exist!\n";
-		return;
+		return FAILURE;
 	}
 
 	union Attribute attr[6];
@@ -521,6 +529,7 @@ void exp(char *rel_name,char *exportname)
 		block_num = next_block_num;
 	}
 	fclose(fp_export);
+	return SUCCESS;
 }
 
 void dump_attrcat()
