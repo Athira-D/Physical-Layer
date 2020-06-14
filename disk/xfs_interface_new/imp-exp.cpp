@@ -41,7 +41,7 @@ int insert_val(vector <string> s,char tablename[16])
 {
 	char ch;
 	int relid=getRelId(tablename);
-	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||E_RELNOTOPEN)
+	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||relid==E_RELNOTOPEN)
 	{
 		return relid;
 	}
@@ -50,8 +50,8 @@ int insert_val(vector <string> s,char tablename[16])
    	y=getRelCatEntry(relid,relcatentry);
 	if(y!=SUCCESS)
 	{
-		//cout<<"INSERT NOT POSSIBLE\n";
-       		return y;
+		cout<<"INSERT NOT POSSIBLE\n";
+       	return y;
 	}
 	int count;
 	count = relcatentry[1].ival;
@@ -68,21 +68,22 @@ int insert_val(vector <string> s,char tablename[16])
 		unsigned char slotmap[h.numSlots];
 		getSlotmap(slotmap,attr_blk);
 		for(int i=0;i<20;i++)
-      		{
-        	    	     getRecord(attr,attr_blk,i);
-		     if((char)slotmap[i]=='0')
-		     {
-			continue;
-		     }
-		     if(strcmp(attr[0].sval,tablename)==0) 
-		     {
-	              	type[attr[5].ival]=attr[2].ival;
-		     } 
+      	{
+        	getRecord(attr,attr_blk,i);
+		    if((char)slotmap[i]=='0')
+		    {
+				continue;
+		    }
+		    if(strcmp(attr[0].sval,tablename)==0) 
+		    {
+	            type[attr[5].ival]=attr[2].ival;
+		    } 
 		}
 		attr_blk =h.rblock;
 	}
 	//-----------------------------------------------------
-          char record_array[count][16];
+
+    char record_array[count][16];
 	if(s.size()!=count)
 	{
 		cout<<"Mismatch in no of arguments\n";
@@ -126,7 +127,7 @@ int insert_val(vector <string> s,char tablename[16])
 		       }
 	}
           int r; 
-	
+		cout<<"Calling insert"<<endl;
           r=ba_insert(relid,rec);
 	if(r==SUCCESS)
 	{cout<<"SUCCESS\n";
@@ -146,7 +147,7 @@ int insert(char tablename[16],char *filename)
 	FILE *file=fopen(filename,"r");
 	char ch;
 	int relid=getRelId(tablename);
-	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||E_RELNOTOPEN)
+	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||relid==E_RELNOTOPEN)
 	{
 		cout<<"INSERT NOT POSSIBLE\n";
 		return relid;
@@ -571,9 +572,9 @@ void dump_attrcat()
 		getSlotmap(slotmap,attr_blk);
 		for(int k=0;k<20;k++)
 		{
-		    char ch[2];
-		  ch[0]=slotmap[k];
-		    fputs(ch,fp_export); 
+		    unsigned char ch=slotmap[k];
+		  //ch[0]=slotmap[k];
+		    fputc(ch,fp_export); 
 		}
 		fputs("\n",fp_export);
 	          
@@ -646,9 +647,9 @@ void dump_relcat()
 		getSlotmap(slotmap,attr_blk);
 		for(int k=0;k<20;k++)
 		{
-		    char ch[2];
-		  ch[0]=slotmap[k];
-		    fputs(ch,fp_export); 
+		    unsigned char ch=slotmap[k];
+		  //ch[0]=slotmap[k];
+		    fputc(ch,fp_export); 
 		}
 		fputs("\n",fp_export);
 	          

@@ -154,6 +154,8 @@ int main()
 			formatdisk();
 			meta();
 			cout<<"Disk formatted"<<endl;
+			continue;
+			//dump_relcat();
 		}
 		else if(regex_match(input_command,dump_rel))
 		{
@@ -177,9 +179,10 @@ int main()
 		}
 		else if(regex_match(input_command,create_table))
 		{
+			cout<<"Matched create table"<<endl;
 			regex_search(input_command,m,create_table);
-			for(auto x:m)
-				cout<<x<<endl;
+			//for(auto x:m)
+				//cout<<x<<endl;
 			string table_name=m[3];
 			char relname[16];
 			string_to_char(table_name,relname,15);
@@ -311,7 +314,11 @@ int main()
 			regex_search(input_command,m,temp);
 			string t=m[0];
 			vector<string> words=strip_whitespace(t);
+			for(int i=0;i<words.size();i++)
+				cout<<words[i]<<endl;
+			cout<<relname<<endl;
 			int ret=insert_val(words,relname);
+			cout<<ret<<endl;
 			if(ret==SUCCESS)
 			{
 				cout<<"Inserted successfully"<<endl;
@@ -447,6 +454,7 @@ int main()
 			string attr=m[8];
 			string o=m[9];
 			string value=m[10];
+			cout<<value<<endl;
 			char src_rel[16];
 			string_to_char(src,src_rel,15);
 			char tar_rel[16];
@@ -526,10 +534,11 @@ int main()
     		{
     			string_to_char(words[i],attrs[i],15);
     		}
+
     		int ret=project(src_rel,tar_rel,count,attrs);
     		if(ret==SUCCESS)
     		{
-    			cout<<"Command executed successfully";
+    			cout<<"Command executed successfully"<<endl;
     		}
     		continue;
 
@@ -540,10 +549,27 @@ int main()
 			vector <string> y;
 			for(auto x:m)
 				y.push_back(x);
-			regex_search(input_command,m,condition);
+			int i;
+			for( i=0;i<y.size();i++)
+				cout<<y[i]<<endl;
+			cout<<"!!!!"<<endl;
+			/*regex_search(input_command,m,condition);
+			for(auto x:m )
+				cout<<x<<endl;
 			string attr=m[1];
 			string o=m[2];
 			string value=m[3];
+			cout<<value<<":::"<<endl;*/
+			
+		
+			for(i=0;i<y.size();i++)
+			{
+				if(y[i]=="where"||y[i]=="WHERE")
+					break;
+			}
+			string attr=y[i+1];
+			string o=y[i+2];
+			string value=y[i+3];
 			char attribute[16];
 			string_to_char(attr,attribute,15);
 			int op;
@@ -573,7 +599,6 @@ int main()
 			}
 			char val[16];
 			string_to_char(value,val,15);
-			int i;
 			for(i=0;i<y.size();i++)
 			{
 				if(y[i]=="from"||y[i]=="FROM")
@@ -605,8 +630,10 @@ int main()
     		{
     			string_to_char(words[i],attrs[i],15);
     		}
-
+    		cout<<attribute<<op<<val;
     		int ret=select(src_rel,"temp",attribute,op,val);
+
+    		//expo("temp","/home/athira/Desktop/Physical-Layer-master/disk/xfs_interface_new/temp.csv");
     		if(ret==SUCCESS)
     		{
     			int relid=openRel("temp");
