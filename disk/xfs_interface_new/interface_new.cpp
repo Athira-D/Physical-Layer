@@ -563,13 +563,14 @@ int main()
 		}
 		else if(regex_match(input_command,select_attr_from_where))
 		{
+			
 			regex_search(input_command,m,select_attr_from_where);
 			vector <string> y;
 			for(auto x:m)
 				y.push_back(x);
 			int i;
-			for( i=0;i<y.size();i++)
-				//cout<<y[i]<<endl;
+			//for( i=0;i<y.size();i++)
+			//	cout<<y[i]<<endl;
 			//cout<<"!!!!"<<endl;
 			/*regex_search(input_command,m,condition);
 			for(auto x:m )
@@ -628,6 +629,7 @@ int main()
 			string_to_char(y[i+3],tar_rel,15);
 			 i = 1; 
 			string attribute_list;
+			//cout<<"I am here\n";
     		while (regex_search(input_command, m,attrlist)) 
     		{ 
 
@@ -647,10 +649,11 @@ int main()
     		for(int i=0;i<count;i++)
     		{
     			string_to_char(words[i],attrs[i],15);
+			//cout<<attrs[i]<<"\n";
     		}
-    	//	cout<<attribute<<op<<val;
+    		//cout<<attribute<<op<<val;
     		int ret=select(src_rel,"temp",attribute,op,val);
-		cout<<ret;
+		//cout<<ret;
     		//expo("temp","/home/athira/Desktop/Physical-Layer-master/disk/xfs_interface_new/temp.csv");
     		if(ret==SUCCESS)
     		{
@@ -658,7 +661,9 @@ int main()
     			int relid=openRel("temp");
     			if(relid!=E_RELNOTEXIST&& relid!=E_CACHEFULL)
     			{
+				
     				int ret_project=project("temp",tar_rel,count,attrs);
+				//cout<<ret_project;
     				if(ret_project==SUCCESS)
     				{
 					//cout<<"I am here\n";
@@ -669,6 +674,8 @@ int main()
     				}
     				else
     				{
+					closeRel(relid);
+    					deleteRel("temp");
     					cout<<"Command failed to execute"<<endl;
     					continue;
     				}
@@ -678,9 +685,13 @@ int main()
     				cout<<"Command failed to execute"<<endl;
     				continue;
     			}
-    			
+	
 
     		}
+		else
+		{
+			cout<<"Failed\n";
+		}
     		continue;
 
 		}

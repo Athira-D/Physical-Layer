@@ -197,14 +197,14 @@ int insert(char tablename[16],char *filename)
 	int relid=getRelId(tablename);
 	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||E_RELNOTOPEN)
 	{
-		cout<<"INSERT NOT POSSIBLE\n";
+		//cout<<"INSERT NOT POSSIBLE\n";
 		return relid;
 	}
    	union Attribute relcatentry[6];
    	int y=getRelCatEntry(relid,relcatentry);
 	if(y!=SUCCESS)
 	{
-		cout<<"INSERT NOT POSSIBLE\n";
+		//cout<<"INSERT NOT POSSIBLE\n";
        		return y;
 	}
 	int count;
