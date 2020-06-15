@@ -6,48 +6,43 @@
 using namespace std;
 int createRel(char relname[16],int nAttrs, char attrs[][ATTR_SIZE],int attrtype[])
 {
+cout<<"In Create fn!\n";
 }
 
 int openRel(char RelName[16])
 {
+cout<<"In openRel fn!\n";
 }
 
 int closeRel(int relid) 
 {
+cout<<"In closeRel fn!\n";
 }
 
 int deleteRel(char relname[ATTR_SIZE])
 {
-}
-
-int renameRel(char Oldrelname[ATTR_SIZE],char Newrelname[ATTR_SIZE])
-{
-}
-
-int renameAttr(char relname[ATTR_SIZE], char OldAttrName[ATTR_SIZE], char NewAttrName[ATTR_SIZE])
-{
+cout<<"In deleteRel fn!\n";
 }
 
 int ba_insert(int relid, union Attribute *rec)
 {
+cout<<"In Insert fn!\n";
 }
 
 
 int select(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr[ATTR_SIZE], int op, char strval[ATTR_SIZE])
 {
+cout<<"In select fn!\n";
 }
 
 int project(char srcrel[ATTR_SIZE],char targetrel[ATTR_SIZE],int tar_nAttrs, char tar_attrs[][ATTR_SIZE])
 {
+cout<<"In project fn!\n";
 }
-
-int insert(char relname[ATTR_SIZE], int nAttrs, char record[][ATTR_SIZE])
-{
-}
-
 
 int join(char srcrel1[ATTR_SIZE],char srcrel2[ATTR_SIZE],char targetrel[ATTR_SIZE], char attr1[ATTR_SIZE], char attr2[ATTR_SIZE])
 {
+cout<<"In join fn!\n";
 }
 
 int getRelId(char relname[16])
@@ -56,14 +51,17 @@ int getRelId(char relname[16])
 
 int bplus_create(int relid, char AttrName[ATTR_SIZE])
 {
+cout<<"In bplusCreate fn!\n";
 }
 
 int dropindex(int relid,char attrname[16])
 {
+cout<<"In drop index fn!\n";
 }
 
 int ba_renamerel(char oldName[ATTR_SIZE], char newName[ATTR_SIZE])
 {
+cout<<"In Rename fn!\n";
 }
 
 int getRelCatEntry(int rel_id, union Attribute *relcat_entry)
@@ -84,10 +82,12 @@ int getRecord(union Attribute *rec,int blockNum,int slotNum)
 
 int ba_renameattr(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName[ATTR_SIZE])
 {
+cout<<"In Rename fn!\n";
 }
 
 int insert_val(vector <string> s,char tablename[16])
 {
+	cout<<"In insert fn!\n";
  	char ch;
 	int relid=getRelId(tablename);
 	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||E_RELNOTOPEN)
@@ -191,6 +191,7 @@ int insert_val(vector <string> s,char tablename[16])
 
 int insert(char tablename[16],char *filename)
 {
+	cout<<"In insert fn!\n";
 	FILE *file=fopen(filename,"r");
 	char ch;
 	int relid=getRelId(tablename);
@@ -296,8 +297,6 @@ int insert(char tablename[16],char *filename)
 	fclose(file);
           return SUCCESS;
 }
-
-
 
 
 

@@ -128,6 +128,7 @@ int main()
 					type_attr[i]=FLOAT;
 
 			}
+			
 			int ret=createRel(relname,no_attrs,attribute,type_attr);
 			if(ret==SUCCESS)
 				cout<<"Relation created successfully"<<endl;
@@ -154,7 +155,7 @@ int main()
 			string_to_char(tablename,relname,15);
 			int ret=openRel(relname);
 			if(ret==SUCCESS)
-				cout<<"Relation created successfully"<<endl;
+				cout<<"Relation opened successfully"<<endl;
 			continue;
 		}
 		else if(regex_match(input_command,close_table))
@@ -172,7 +173,7 @@ int main()
 			int ret=closeRel(id);
 			
 			if(ret==SUCCESS)
-				cout<<"Relation created successfully"<<endl;
+				cout<<"Relation closed successfully"<<endl;
 			continue;
 		}
 		else if(regex_match(input_command,drop_table))
@@ -183,7 +184,7 @@ int main()
 			string_to_char(tablename,relname,15);
 			int ret=deleteRel(relname);
 			if(ret==SUCCESS)
-				cout<<"Relation created successfully"<<endl;
+				cout<<"Relation dropped successfully"<<endl;
 			continue;
 		}
 		else if(regex_match(input_command,create_index))
@@ -223,7 +224,7 @@ int main()
 			}
 			int ret=dropindex(relid,attr_name);
 			if(ret==SUCCESS)
-				cout<<"Index created successfully";	
+				cout<<"Index dropped successfully";	
 			continue;
 		}
 		else if(regex_match(input_command,insert_single))
@@ -312,7 +313,7 @@ int main()
 		}
 		else if(regex_match(input_command,select_from))
 		{
-			//cout<<"Matched select"<<endl;
+			cout<<"In select"<<endl;
 			regex_search(input_command,m,select_from);
 			string source=m[4];
 			string target=m[6];
@@ -323,14 +324,14 @@ int main()
 			int src_relid=getRelId(source_rel);
 			if(src_relid==E_RELNOTOPEN)
 			{
-				cout<<"Source relation not open"<<endl;
+				//cout<<"Source relation not open"<<endl;
 				continue;
 			}
 			union Attribute relcatentry[6];
 			if(getRelCatEntry(src_relid,relcatentry)!=SUCCESS)
 			{
-				cout<<"SELECT NOT POSSIBLE\n";
-       			continue;
+				//cout<<"SELECT NOT POSSIBLE\n";
+       				continue;
 			}
 			int nAttrs;
 			nAttrs = relcatentry[1].ival;
@@ -345,7 +346,7 @@ int main()
 				getSlotmap(slotmap,attr_blk);
 				for(int i=0;i<20;i++)
       			{
-        	    	getRecord(attr,attr_blk,i);
+        	    			getRecord(attr,attr_blk,i);
 		    		if((char)slotmap[i]=='0')
 		    		{
 						continue;
@@ -545,15 +546,11 @@ int main()
     					deleteRel("temp");
     					continue;
     				}
-    				else
-    				{
-    					cout<<"Command failed to execute"<<endl;
-    					continue;
-    				}
+ 
     			}
     			else
     			{
-    				cout<<"Command failed to execute"<<endl;
+    				
     				continue;
     			}
     			
@@ -589,11 +586,7 @@ int main()
 				continue;
 			}
 			
-			else
-			{
-				cout<<"Join Failed"<<endl;
-				continue;
-			}
+			
 			//m[4]<<" "<<m[6]<<" "<<m[8]<<" "<<m[10]<<" "<<m[11]<<" "<<m[12]<<" "<<m[13]<<endl;
 		//	for(auto x:m)
 		//		cout<<x<<endl;
@@ -635,7 +628,7 @@ int main()
 				relid=openRel("temp");
 				if(!(relid>=0&&relid<MAXOPEN))
 				{
-					cout<<"Join Failed"<<endl;
+					//cout<<"Join Failed"<<endl;
 				}
 				i = 1; 
 				string attribute_list;
@@ -674,7 +667,7 @@ int main()
 			
 			else
 			{
-				cout<<"Join Failed"<<endl;
+				//cout<<"Join Failed"<<endl;
 				continue;
 			}
 			//m[4]<<" "<<m[6]<<" "<<m[8]<<" "<<m[10]<<" "<<m[11]<<" "<<m[12]<<" "<<m[13]<<endl;
