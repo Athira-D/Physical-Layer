@@ -58,8 +58,8 @@ int setEntry(struct InternalEntry internalentry,int block,int offset)
 			internalentry.rChild=entry.rChild;
 	}
 
-	cout<<"In internal\n";
-	cout<<internalentry.attrVal.ival<<" "<<internalentry.lChild<<" "<<internalentry.rChild<<"\n"<<block<<" "<<offset<<"\n\n";
+	//cout<<"In internal\n";
+	//cout<<internalentry.attrVal.ival<<" "<<internalentry.lChild<<" "<<internalentry.rChild<<"\n"<<block<<" "<<offset<<"\n\n";
 	FILE *disk=fopen("disk","rb+");
 	fseek(disk,block*BLOCK_SIZE+32+offset*20,SEEK_SET);
 	fwrite(&internalentry,sizeof(internalentry),1,disk);
@@ -70,8 +70,8 @@ int setEntry(struct InternalEntry internalentry,int block,int offset)
 
 int setLeafEntry(struct Index rec,int leaf,int offset)
 {
-	cout<<"Leaf Node:\n";
-	cout<<"Value:"<<rec.attrVal.ival<<" "<<rec.block<<" "<<rec.slot<<"\nLeaf Block:"<<leaf<<" "<<offset<<"\n\n";
+	//cout<<"Leaf Node:\n";
+	//cout<<"Value:"<<rec.attrVal.ival<<" "<<rec.block<<" "<<rec.slot<<"\nLeaf Block:"<<leaf<<" "<<offset<<"\n\n";
 	FILE *disk=fopen("disk","rb+");
 	fseek(disk,leaf*BLOCK_SIZE+32+offset*32,SEEK_SET);
 	fwrite(&rec,sizeof(rec),1,disk);

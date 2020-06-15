@@ -71,7 +71,7 @@ bool check_filenamelength(string filename)
 	int pos1= filename.rfind('.');
 	if(filename.substr(pos1+1,filename.length())=="csv")
 	{
-		cout<<";;;;";
+		//cout<<";;;;";
 		string file_name=filename.substr(0,pos1);
 		if(file_name.length()>15)
 		{	
@@ -100,7 +100,7 @@ int main()
 		}
 		else if(regex_match(input_command,imp))
 		{
-			cout<<"Matched"<<endl;
+			//cout<<"Matched"<<endl;
 			string Filepath;
 			regex_search(input_command,m,filepath);
 			Filepath=m[0];
@@ -115,13 +115,13 @@ int main()
 			fclose(file);
 			regex_search(input_command,m,filename);
 			string Filename=m[0];
-			cout<<Filename<<endl;
+			//cout<<Filename<<endl;
 			bool r=check_filenamelength(Filename);
 			if(!r)
 			{
 				continue;
 			}
-			cout<<"here"<<endl;
+			//cout<<"here"<<endl;
 			int ret=import(f);
 			if(ret==SUCCESS)
 				cout<<" Imported successfully"<<endl;
@@ -130,7 +130,7 @@ int main()
 			
 		else if(regex_match(input_command,expo))
 		{
-			cout<<"Matched export"<<endl;
+			////cout<<"Matched export"<<endl;
 			regex_search(input_command,m,expo);
 			
 			string table_name=m[2];
@@ -141,7 +141,7 @@ int main()
 			string_to_char(table_name,relname,15);
 			char f[Filepath.length()+1];
 			string_to_char(Filepath,f,Filepath.length());
-			cout<<relname<<endl;
+			//cout<<relname<<endl;
 			int ret= exp(relname,f);
 			if(ret==SUCCESS)
 				cout<<"Exported successfully"<<endl;
@@ -179,7 +179,7 @@ int main()
 		}
 		else if(regex_match(input_command,create_table))
 		{
-			cout<<"Matched create table"<<endl;
+			//cout<<"Matched create table"<<endl;
 			regex_search(input_command,m,create_table);
 			//for(auto x:m)
 				//cout<<x<<endl;
@@ -231,8 +231,8 @@ int main()
 			char relname[16];
 			string_to_char(tablename,relname,15);
 			int ret=openRel(relname);
-			if(ret==SUCCESS)
-				cout<<"Relation created successfully"<<endl;
+			if(ret>=0&&ret<=11)
+			 	 cout<<"Relation opened successfully\n";
 			continue;
 		}
 		else if(regex_match(input_command,close_table))
@@ -244,13 +244,13 @@ int main()
 			int id=getRelId(relname);
 			if(id==E_RELNOTOPEN)
 			{
-				cout<<"E_RELNOTOPEN"<<endl;
+				cout<<"Failed"<<endl;
 				continue;
 			}
 			int ret=closeRel(id);
 			
 			if(ret==SUCCESS)
-				cout<<"Relation created successfully"<<endl;
+				cout<<"Relation closed successfully"<<endl;
 			continue;
 		}
 		else if(regex_match(input_command,drop_table))
@@ -261,12 +261,12 @@ int main()
 			string_to_char(tablename,relname,15);
 			int ret=deleteRel(relname);
 			if(ret==SUCCESS)
-				cout<<"Relation created successfully"<<endl;
+				cout<<"Relation deleted successfully"<<endl;
 			continue;
 		}
 		else if(regex_match(input_command,create_index))
 		{
-			cout<<"Matched"<<endl;
+			////cout<<"Matched"<<endl;
 			regex_search(input_command,m,create_index);
 			string tablename=m[4];
 			string attrname=m[5];
@@ -276,17 +276,17 @@ int main()
 			int relid=getRelId(relname);
 			if(relid==E_RELNOTOPEN)
 			{
-				cout<<"E_RELNOTOPEN";
+				cout<<"E_RELNOTOPEN\n";
 				continue;
 			}
 			int ret=bplus_create(relid,attr_name);
 			if(ret==SUCCESS)
-				cout<<"Index created successfully";	
+				cout<<"Index created successfully\n";	
 			continue;
 		}
 		else if(regex_match(input_command,drop_index))
 		{
-			cout<<"Matched"<<endl;
+			////cout<<"Matched"<<endl;
 			regex_search(input_command,m,drop_index);
 			string tablename=m[4];
 			string attrname=m[5];
@@ -301,12 +301,12 @@ int main()
 			}
 			int ret=dropindex(relid,attr_name);
 			if(ret==SUCCESS)
-				cout<<"Index created successfully";	
+				//cout<<"Index created successfully";	
 			continue;
 		}
 		else if(regex_match(input_command,insert_single))
 		{
-			cout<<"Matched"<<endl;
+			//cout<<"Matched"<<endl;
 			regex_search(input_command,m,insert_single);
 			string tablename=m[3];
 			char relname[16];
@@ -314,11 +314,11 @@ int main()
 			regex_search(input_command,m,temp);
 			string t=m[0];
 			vector<string> words=strip_whitespace(t);
-			for(int i=0;i<words.size();i++)
-				cout<<words[i]<<endl;
-			cout<<relname<<endl;
+			//for(int i=0;i<words.size();i++)
+			//	cout<<words[i]<<endl;
+			//cout<<relname<<endl;
 			int ret=insert_val(words,relname);
-			cout<<ret<<endl;
+			//cout<<ret<<endl;
 			if(ret==SUCCESS)
 			{
 				cout<<"Inserted successfully"<<endl;
@@ -328,7 +328,7 @@ int main()
 		}
 		else if(regex_match(input_command,insert_multiple))
 		{
-			cout<<"Matched"<<endl;
+			//cout<<"Matched"<<endl;
 			regex_search(input_command,m,insert_multiple);
 			string tablename=m[3];
 			char relname[16];
@@ -354,7 +354,7 @@ int main()
 		}
 		else if(regex_match(input_command,rename_table))
 		{
-			cout<<"Matched"<<endl;
+			//cout<<"Matched"<<endl;
 			regex_search(input_command,m,rename_table);
 			string oldtablename=m[4];
 			string newtablename=m[6];
@@ -367,13 +367,17 @@ int main()
 			{
 				cout<<"Renamed Relation Successfully"<<endl;
 			}
+			else
+			{
+				cout<<"Failed\n";
+			}
 			continue;
 
 			
 		}
 		else if(regex_match(input_command,rename_column))
 		{
-			cout<<"Matched"<<endl;
+			//cout<<"Matched"<<endl;
 			regex_search(input_command,m,rename_column);
 			string tablename=m[4];
 			string oldcolumnname=m[6];
@@ -389,12 +393,16 @@ int main()
 			{
 				cout<<"Renamed Attribute Successfully"<<endl;
 			}
+			else
+			{
+				cout<<"Failed\n";
+			}
 			continue;
 			
 		}
 		else if(regex_match(input_command,select_from))
 		{
-			cout<<"Matched select"<<endl;
+			//cout<<"Matched select"<<endl;
 			regex_search(input_command,m,select_from);
 			string source=m[4];
 			string target=m[6];
@@ -443,18 +451,22 @@ int main()
 			int ret=project(source_rel,target_rel,nAttrs,tar_attrs);
 			if(ret==SUCCESS)
 				cout<<"Select successful"<<endl;
+			else
+			{
+			cout<<"Failed\n";
+			}
 			continue;
 		}
 		else if(regex_match(input_command,select_from_where))
 		{
-			cout<<"Matched select where"<<endl;
+			//cout<<"Matched select where"<<endl;
 			regex_search(input_command,m,select_from_where);
 			string src=m[4];
 			string tar=m[6];
 			string attr=m[8];
 			string o=m[9];
 			string value=m[10];
-			cout<<value<<endl;
+			//cout<<value<<endl;
 			char src_rel[16];
 			string_to_char(src,src_rel,15);
 			char tar_rel[16];
@@ -493,6 +505,10 @@ int main()
 			{
 				cout<<"Select executed successfully"<<endl;
 			}
+			else
+			{
+				cout<<"Failed\n";
+			}
 			continue;
 
 		}
@@ -517,9 +533,7 @@ int main()
     		while (regex_search(input_command, m,attrlist)) 
     		{ 
 
-        		cout << "\nMatched string is " << m.str(0) << endl 
-             			<< "and it is found at position " 
-             	<< m.position(0)<<endl;  
+        		//cout << "\nMatched string is " << m.str(0) << endl << "and it is found at position " << m.position(0)<<endl;  
              	if(i==2)
              		attribute_list=m.str(0);
         		i++; 
@@ -540,6 +554,10 @@ int main()
     		{
     			cout<<"Command executed successfully"<<endl;
     		}
+		else
+		{
+			cout<<"Failed\n";
+		}
     		continue;
 
 		}
@@ -551,8 +569,8 @@ int main()
 				y.push_back(x);
 			int i;
 			for( i=0;i<y.size();i++)
-				cout<<y[i]<<endl;
-			cout<<"!!!!"<<endl;
+				//cout<<y[i]<<endl;
+			//cout<<"!!!!"<<endl;
 			/*regex_search(input_command,m,condition);
 			for(auto x:m )
 				cout<<x<<endl;
@@ -613,9 +631,9 @@ int main()
     		while (regex_search(input_command, m,attrlist)) 
     		{ 
 
-        		cout << "\nMatched string is " << m.str(0) << endl 
-             			<< "and it is found at position " 
-             	<< m.position(0)<<endl;  
+        		//cout << "\nMatched string is " << m.str(0) << endl 
+             	//		<< "and it is found at position " 
+             	//<< m.position(0)<<endl;  
              	if(i==2)
              		attribute_list=m.str(0);
         		i++; 
@@ -630,18 +648,20 @@ int main()
     		{
     			string_to_char(words[i],attrs[i],15);
     		}
-    		cout<<attribute<<op<<val;
+    	//	cout<<attribute<<op<<val;
     		int ret=select(src_rel,"temp",attribute,op,val);
-
+		cout<<ret;
     		//expo("temp","/home/athira/Desktop/Physical-Layer-master/disk/xfs_interface_new/temp.csv");
     		if(ret==SUCCESS)
     		{
+			//cout<<"I am here\n";
     			int relid=openRel("temp");
     			if(relid!=E_RELNOTEXIST&& relid!=E_CACHEFULL)
     			{
     				int ret_project=project("temp",tar_rel,count,attrs);
     				if(ret_project==SUCCESS)
     				{
+					//cout<<"I am here\n";
     					cout<<"Command executed successfully"<<endl;
     					closeRel(relid);
     					deleteRel("temp");
@@ -697,9 +717,7 @@ int main()
 				continue;
 			}
 			//m[4]<<" "<<m[6]<<" "<<m[8]<<" "<<m[10]<<" "<<m[11]<<" "<<m[12]<<" "<<m[13]<<endl;
-			for(auto x:m)
-				cout<<x<<endl;
-
+			
 		}
 		else if(regex_match(input_command,select_attr_from_join))
 		{
@@ -711,7 +729,7 @@ int main()
 			int i;
 			for(i=0;i<y.size();i++)
 			{
-				cout<<y[i]<<endl;
+				//cout<<y[i]<<endl;
 			}
 			for(i=0;i<y.size();i++)
 			{
@@ -744,9 +762,9 @@ int main()
     			while (regex_search(input_command, m,attrlist)) 
     			{ 
 
-        			cout << "\nMatched string is " << m.str(0) << endl 
-             				<< "and it is found at position " 
-             		<< m.position(0)<<endl;  
+        			//cout << "\nMatched string is " << m.str(0) << endl 
+             	//			<< "and it is found at position " 
+             	//	<< m.position(0)<<endl;  
              		if(i==2)
              			attribute_list=m.str(0);
         			i++; 
@@ -780,8 +798,7 @@ int main()
 				continue;
 			}
 			//m[4]<<" "<<m[6]<<" "<<m[8]<<" "<<m[10]<<" "<<m[11]<<" "<<m[12]<<" "<<m[13]<<endl;
-			for(auto x:m)
-				cout<<x<<endl;
+			
 		}
 		
 		

@@ -81,18 +81,23 @@ int openRel(char RelName[16])
        }
        if(i==20)
        {
+	cout<<"Relation not exists\n";
            return E_RELNOTEXIST;
        }
        for(i=0;i<12;i++)
        {  
 	if(strcmp(RelName,OpenRelTable[i])==0)
+	{
+	//cout<<"Relation already opened\n";
             return i;
+	}
         }
        for(i=0;i<12;i++)
        {
           if(strcmp(OpenRelTable[i],"NULL")==0)
           {  
               strcpy(OpenRelTable[i],RelName);
+	   
               return i;   
           }
        }

@@ -43,6 +43,7 @@ int insert_val(vector <string> s,char tablename[16])
 	int relid=getRelId(tablename);
 	if(relid==E_CACHEFULL||relid==E_RELNOTEXIST||relid==E_RELNOTOPEN)
 	{
+		cout<<"Relation not open\n";
 		return relid;
 	}
    	union Attribute relcatentry[6];
@@ -127,10 +128,10 @@ int insert_val(vector <string> s,char tablename[16])
 		       }
 	}
           int r; 
-		cout<<"Calling insert"<<endl;
+		//cout<<"Calling insert"<<endl;
           r=ba_insert(relid,rec);
 	if(r==SUCCESS)
-	{cout<<"SUCCESS\n";
+	{
 		return SUCCESS;
 	}
 	else
