@@ -199,13 +199,35 @@ int insert(char tablename[16],char *filename)
 	 if(ch==EOF)	
                    break;
            len=1;
+           int c_c=0;
+	 char oldch=',';
 	 while((ch  != '\n')&&(ch!=EOF)) 
 	 {
+		if(ch==',')
+			c_c++;
+		if(oldch==ch&&ch==',')
+		{
+			cout<<"NULL VALUES NOT ALLOWED\n";
+			return FAILURE;
+		}
         		 record[len-1]=ch;
        		 len++;
        		 record=(char*) realloc(record,(len)*sizeof(char));
+		 oldch=ch;
                      ch=fgetc(file);
+		
     	}
+          if(oldch==',')
+	{
+			cout<<"NULL VALUES NOT ALLOWED IN ATTRIBUTE VALUES\n";
+			return FAILURE;
+	}
+           if(count!=c_c+1)
+	{
+			//closeRel(relid);
+			cout<<"MISMATCH IN NO OF ATTRIBUTES\n";
+			return FAILURE;	
+	}
           record[len-1]='\0';
     	int i=0;
          //record contains each record in the file (seperated by commas)
@@ -213,9 +235,15 @@ int insert(char tablename[16],char *filename)
     	j=0;
 	while(j<count)
 	{ 	int k=0;
-       		while(((record[i]!=',')&&(record[i]!='\0'))&&(k<16))
+		
+       		while(((record[i]!=',')&&(record[i]!='\0'))&&(k<15))
 		{
 	    		record_array[j][k++]=record[i++];        
+		}
+		if(k==15)
+		{
+		        while(record[i]!=',')
+				i++;	
 		}
                     i++;
                     record_array[j][k]='\0';
@@ -259,25 +287,45 @@ int import(char *filename)
      //count : no of attributes in the file
      char *attr=(char*) malloc(sizeof(char));
      int len=1;
-     char ch;
+     char ch,oldch;
      int count=1;
+     oldch=',';
      while((ch = fgetc(file)) != '\n') 
      {
  	if(ch==',')
+	{
 		count++;
+		if(oldch==ch)
+		{
+			cout<<"NULL VALUES NOT ALLOWED IN ATTRIBUTE NAMES\n";
+			return FAILURE;
+		}
+	}
           attr[len-1]=ch;
           len++;
           attr=(char*) realloc(attr,(len)*sizeof(char));
+          oldch=ch;
+        //  cout<<oldch<<"\n";
     }
+    if(oldch==',')
+	{
+			cout<<"NULL VALUES NOT ALLOWED IN ATTRIBUTE NAMES\n";
+			return FAILURE;
+	}
      attr[len-1]='\0';
      int i=0,j,k;
      char attribute[count][16];
      j=0;
 	while(j<count)
 	{ 	k=0;
-       		while(((attr[i]!=',')&&(attr[i]!='\0'))&&(k<16))
+       		while(((attr[i]!=',')&&(attr[i]!='\0'))&&(k<15))
 		{
 	    		attribute[j][k++]=attr[i++];
+		}
+		if(k==15)
+		{
+		        while(attr[i]!=',')
+				i++;	
 		}
 		attribute[j][k]='\0';
 		j++;i++;
@@ -302,7 +350,7 @@ int import(char *filename)
     	j=0;
 	while(j<count)
 	{ 	k=0;
-       		while(((attr_type[i]!=',')&&(attr_type[i]!='\0'))&&(k<16))
+       		while(((attr_type[i]!=',')&&(attr_type[i]!='\0'))&&(k<15))
 		{
 	    		attribute_type[j][k++]=attr_type[i++];
 		}
@@ -366,13 +414,39 @@ int import(char *filename)
 	 if(ch==EOF)	
                    break;
           len=1;
+	int c_c=0;
+	oldch=',';
 	while((ch  != '\n')&&(ch!=EOF)) 
 	 {
+		if(ch==',')
+			c_c++;
+		if(ch==oldch&&ch==',')
+		{
+
+			closeRel(relid);
+			ba_delete(newfilename);
+			cout<<"NULL VALUES NOT ALLOWED IN ATTIBUTE VALUES\n";
+			return FAILURE;
+		}
         		 record[len-1]=ch;
        		 len++;
        		 record=(char*) realloc(record,(len)*sizeof(char));
+		 oldch=ch;
                      ch=fgetc(file);
     	}
+	if(oldch==',')
+	{
+			cout<<"NULL VALUES NOT ALLOWED IN ATTRIBUTE VALUES\n";
+			return FAILURE;
+	}
+           if(count!=c_c+1)
+	{
+			closeRel(relid);
+			ba_delete(newfilename);
+			cout<<"MISMATCH IN NO OF ATTRIBUTES\n";
+			return FAILURE;	
+	}
+         // cout<<record<<"\n";
           record[len-1]='\0';
     	i=0;
          //record contains each record in the file (seperated by commas)
@@ -380,14 +454,22 @@ int import(char *filename)
     	j=0;
 	while(j<count)
 	{ 	k=0;
-       		while(((record[i]!=',')&&(record[i]!='\0'))&&(k<16))
+
+       		while(((record[i]!=',')&&(record[i]!='\0'))&&(k<15))
 		{
 	    		record_array[j][k++]=record[i++];        
 		}
+		if(k==15)
+		{
+		        while(record[i]!=',')
+				i++;	
+		}
                     i++;
                     record_array[j][k]='\0';
+		
                     j++;
 	}
+          
           union Attribute rec[count];
           for(int l=0;l<count;l++)
 	{
@@ -418,6 +500,7 @@ int import(char *filename)
           }
 	 if(ch==EOF)	
                    break;
+          
           }
           closeRel(relid);
 	fclose(file);
