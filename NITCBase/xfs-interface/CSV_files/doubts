@@ -1,0 +1,2 @@
+1.CloseRel commits everything to disk.When we implement we write everything to the disk directly instead of a final commit( in xfs-interface). Is this fine?
+2.If the concept of final commit is not required,why dont we chuck openrel and closerel. Also for deleterel 
